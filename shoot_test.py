@@ -12,6 +12,7 @@ class TestShootRunner(unittest.TestCase):
         runner = ShootRunner()
         mockRecord = MagicMock()
         runner.__createRecord__ = MagicMock(return_value = mockRecord)
+        runner.__run_round__ = MagicMock(side_effect = ['player1', 'player2', 'player2'])
         mockRecord.__str__.return_value = RECORD_STR
         #when
         actual = runner.run(3, game)
