@@ -4,7 +4,6 @@ from unittest.mock import call
 from shoot import Game, GameRecord, ShootRunner
 
 class TestShootRunner(unittest.TestCase):
-    
     def test_run_game(self):
         RECORD_STR = '共对决10次。刘备胜5次，胜率5%。曹操胜2次，胜率2%。吕布胜3次，胜率3%。'
         #given
@@ -40,10 +39,14 @@ class TestShootRunner(unittest.TestCase):
         runner = ShootRunner()
         mockBattle = MagicMock()
         runner.__createBattle__ = MagicMock(return_value = mockBattle)
-        mcokBattle.shoot.side_effect = lambda p1,p2: p2 == 'player2'
+        mockBattle.shoot.side_effect = lambda p1,p2: p2 == 'player2'
         #when
         actual = runner.run_round(game)
         #then
         mockBattle.shoot.assert_called_once_with('player1', 'player2')
         mockBattle.shoot.assert_called_once_with('player2', 'player1')
         self.assertEqual('player2', actual)
+
+if __name__ == '__main__':
+    unittest.main()
+
