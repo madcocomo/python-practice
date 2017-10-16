@@ -23,12 +23,12 @@ class GameRecord:
 class ShootRunner:
     def __createRecord__(self, game):
         return GameRecord(game)
-    def __run_round__(self, game):
+    def run_round(self, game):
         return game.players[0][0]
     def run(self, times, game):
         record = self.__createRecord__(game)
         for i in range(times):
-            record.record(self.__run_round__(game))
+            record.record(self.run_round(game))
         return record.__str__()
 
 def main():

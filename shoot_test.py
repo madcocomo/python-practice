@@ -12,7 +12,7 @@ class TestShootRunner(unittest.TestCase):
         runner = ShootRunner()
         mockRecord = MagicMock()
         runner.__createRecord__ = MagicMock(return_value = mockRecord)
-        runner.__run_round__ = MagicMock(side_effect = ['player1', 'player2', 'player2'])
+        runner.run_round = MagicMock(side_effect = ['player1', 'player2', 'player2'])
         mockRecord.__str__.return_value = RECORD_STR
         #when
         actual = runner.run(3, game)
@@ -34,6 +34,16 @@ class TestShootRunner(unittest.TestCase):
 对决8次。刘备胜2次，胜率25.0%；曹操胜1次，胜率12.5%；吕布胜5次，胜率62.5%。'''
         self.assertEqual(expect, actual)
 
-
-if __name__ == '__main__':
-    unittest.main()
+    def test_run_round(self):
+        #given
+        game = Game([('player1', 0), ('player2', 100)])
+        runner = ShootRunner()
+        mockBattle = MagicMock()
+        runner.__createBattle__ = MagicMock(return_value = mockBattle)
+        mcokBattle.shoot.side_effect = lambda p1,p2: p2 == 'player2'
+        #when
+        actual = runner.run_round(game)
+        #then
+        mockBattle.shoot.assert_called_once_with('player1', 'player2')
+        mockBattle.shoot.assert_called_once_with('player2', 'player1')
+        self.assertEqual('player2', actual)
