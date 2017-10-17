@@ -3,6 +3,14 @@ class Game:
     def __init__(self, players):
         self.players = players
 
+class Battle:
+    def __init__(self, game):
+        self.game = game
+        self.details = []
+    def run(self):
+        self.details.append((self.game.players[0][0], self.game.players[1][0], False))
+        return self.game.players[0][0]
+
 class GameRecord:
     def __init__(self, game):
         self.game = game
@@ -21,20 +29,24 @@ class GameRecord:
         return self.playersInfo() + '\n' + self.gameInfo()
 
 class ShootRunner:
-    def __createRecord__(self, game):
-        return GameRecord(game)
-    def run_round(self, game):
-        return game.players[0][0]
-    def run(self, times, game):
-        record = self.__createRecord__(game)
+    def __init__(self, game):
+        self.game = game
+    def __createRecord__(self):
+        return GameRecord(self.game)
+    def __createBattle__(self):
+        return Battle(self.game)
+    def run_battle(self):
+        return self.__createBattle__().run()
+    def run(self, times):
+        record = self.__createRecord__()
         for i in range(times):
-            record.record(self.run_round(game))
+            record.record(self.run_battle())
         return record.__str__()
 
 def main():
     game = Game([('刘备', 30), ('曹操', 50), ('吕布', 100)])
-    runner = ShootRunner()
-    print(runner.run(10, game))
+    runner = ShootRunner(game)
+    print(runner.run(10))
 
 if __name__ == '__main__':
     main()

@@ -1,20 +1,20 @@
 import unittest
 from unittest.mock import MagicMock
 from unittest.mock import call
-from shoot import Game, GameRecord, ShootRunner
+from shoot import Game, GameRecord, ShootRunner, Battle
 
 class TestShootRunner(unittest.TestCase):
     def test_run_game(self):
         RECORD_STR = '共对决10次。刘备胜5次，胜率5%。曹操胜2次，胜率2%。吕布胜3次，胜率3%。'
         #given
         game = Game([('player1', 10), ('player2', 20)])
-        runner = ShootRunner()
+        runner = ShootRunner(game)
         mockRecord = MagicMock()
         runner.__createRecord__ = MagicMock(return_value = mockRecord)
-        runner.run_round = MagicMock(side_effect = ['player1', 'player2', 'player2'])
+        runner.run_battle = MagicMock(side_effect = ['player1', 'player2', 'player2'])
         mockRecord.__str__.return_value = RECORD_STR
         #when
-        actual = runner.run(3, game)
+        actual = runner.run(3)
         #then
         self.assertEqual(RECORD_STR, actual)
         mockRecord.record.assert_has_calls([call('player1'), call('player2'), call('player2')])
@@ -33,19 +33,28 @@ class TestShootRunner(unittest.TestCase):
 对决8次。刘备胜2次，胜率25.0%；曹操胜1次，胜率12.5%；吕布胜5次，胜率62.5%。'''
         self.assertEqual(expect, actual)
 
-    def test_run_round(self):
+    def test_run_battle(self):
         #given
         game = Game([('player1', 0), ('player2', 100)])
-        runner = ShootRunner()
+        runner = ShootRunner(game)
         mockBattle = MagicMock()
         runner.__createBattle__ = MagicMock(return_value = mockBattle)
-        mockBattle.shoot.side_effect = lambda p1,p2: p2 == 'player2'
+        mockBattle.run.return_value = 'player2'
         #when
-        actual = runner.run_round(game)
+        actual = runner.run_battle()
         #then
-        mockBattle.shoot.assert_called_once_with('player1', 'player2')
-        mockBattle.shoot.assert_called_once_with('player2', 'player1')
+        mockBattle.run.assert_called_once()
         self.assertEqual('player2', actual)
+
+    def test_battle_details(self):
+        #given
+        game = Game([('player1', 0), ('player2', 100)])
+        battle = Battle(game)
+        #when
+        battle.run()
+        #then
+        self.assertEqual(('player1', 'player2', False), battle.details[0])
+
 
 if __name__ == '__main__':
     unittest.main()
