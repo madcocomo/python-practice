@@ -3,13 +3,26 @@ class Game:
     def __init__(self, players):
         self.players = players
 
+class BattleRound:
+    def __init__(self, players):
+        self.log = []
+        self.aliver = list(players)
+    def run(self):
+        self.log.append((self.aliver[0][0], self.aliver[1][0], False))
+        self.log.append((self.aliver[1][0], self.aliver[0][0], True))
+        del self.aliver[0]
+
 class Battle:
     def __init__(self, game):
         self.game = game
-        self.details = []
+        self.rounds = []
     def run(self):
-        self.details.append((self.game.players[0][0], self.game.players[1][0], False))
-        return self.game.players[0][0]
+        newRound = BattleRound(self.game.players)
+        self.rounds.append(newRound)
+        newRound.run()
+        if len(newRound.aliver) == 1:
+            return newRound.aliver[0][0]
+        return newRound.aliver[0][0]
 
 class GameRecord:
     def __init__(self, game):

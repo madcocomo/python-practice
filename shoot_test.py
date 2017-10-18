@@ -53,7 +53,9 @@ class TestShootRunner(unittest.TestCase):
         #when
         battle.run()
         #then
-        self.assertEqual(('player1', 'player2', False), battle.details[0])
+        round1 = battle.rounds[0]
+        self.assertEqual(('player1', 'player2', False), round1.log[0])
+        self.assertEqual(('player2', 'player1', True), round1.log[1])
 
 
 if __name__ == '__main__':
