@@ -46,16 +46,19 @@ class TestShootRunner(unittest.TestCase):
         mockBattle.run.assert_called_once()
         self.assertEqual('player2', actual)
 
-    def test_battle_details(self):
+    def test_one_round_battle(self):
         #given
         game = Game([('player1', 0), ('player2', 100)])
+        game.isHit = MagicMock(side_effect = lambda shooter: shooter == 'player2')
         battle = Battle(game)
         #when
-        battle.run()
+        winner = battle.run()
         #then
+        self.assertEqual('player2', winner)
         round1 = battle.rounds[0]
         self.assertEqual(('player1', 'player2', False), round1.log[0])
         self.assertEqual(('player2', 'player1', True), round1.log[1])
+        game.isHit.assert_has_calls([call('player1'), call('player2')])
 
 
 if __name__ == '__main__':

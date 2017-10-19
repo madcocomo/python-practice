@@ -2,22 +2,34 @@
 class Game:
     def __init__(self, players):
         self.players = players
+    def isHit(self, shooter):
+        pass
 
 class BattleRound:
-    def __init__(self, players):
+    def __init__(self, players, game):
         self.log = []
         self.aliver = list(players)
+        self.game = game
     def run(self):
-        self.log.append((self.aliver[0][0], self.aliver[1][0], False))
-        self.log.append((self.aliver[1][0], self.aliver[0][0], True))
-        del self.aliver[0]
-
+        self.shoot(self.aliver[0][0], self.aliver[1][0])
+        self.shoot(self.aliver[1][0], self.aliver[0][0])
+    def shoot(self, shooter, target):
+        isHit = self.game.isHit(shooter)
+        self.log.append((shooter, target, isHit))
+        if isHit:
+            self.die(target)
+    def die(self, playerName):
+        for player in self.aliver:
+            if (player[0] == playerName):
+                dead = player
+        self.aliver.remove(dead)
+        
 class Battle:
     def __init__(self, game):
         self.game = game
         self.rounds = []
     def run(self):
-        newRound = BattleRound(self.game.players)
+        newRound = BattleRound(self.game.players, self.game)
         self.rounds.append(newRound)
         newRound.run()
         if len(newRound.aliver) == 1:
