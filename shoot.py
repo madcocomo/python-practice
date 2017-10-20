@@ -3,38 +3,42 @@ class Game:
     def __init__(self, players):
         self.players = players
     def isHit(self, shooter):
-        pass
+        return True
 
 class BattleRound:
     def __init__(self, players, game):
         self.log = []
-        self.aliver = list(players)
+        self.alivers = list(players)
         self.game = game
     def run(self):
-        self.shoot(self.aliver[0][0], self.aliver[1][0])
-        self.shoot(self.aliver[1][0], self.aliver[0][0])
+        self.shoot(self.alivers[0][0], self.alivers[1][0])
+        self.shoot(self.alivers[1][0], self.alivers[0][0])
     def shoot(self, shooter, target):
         isHit = self.game.isHit(shooter)
         self.log.append((shooter, target, isHit))
         if isHit:
             self.die(target)
     def die(self, playerName):
-        for player in self.aliver:
+        for player in self.alivers:
             if (player[0] == playerName):
                 dead = player
-        self.aliver.remove(dead)
+        self.alivers.remove(dead)
         
 class Battle:
     def __init__(self, game):
         self.game = game
         self.rounds = []
     def run(self):
-        newRound = BattleRound(self.game.players, self.game)
-        self.rounds.append(newRound)
-        newRound.run()
-        if len(newRound.aliver) == 1:
-            return newRound.aliver[0][0]
-        return newRound.aliver[0][0]
+        alivers = self.game.players
+        #while len(alivers) > 1:
+        for time in range(100):
+            if len(alivers) == 1:
+                return alivers[0][0]
+            newRound = BattleRound(alivers, self.game)
+            self.rounds.append(newRound)
+            newRound.run()
+            alivers = newRound.alivers
+        raise Exception('dead loop')
 
 class GameRecord:
     def __init__(self, game):

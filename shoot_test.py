@@ -60,6 +60,33 @@ class TestShootRunner(unittest.TestCase):
         self.assertEqual(('player2', 'player1', True), round1.log[1])
         game.isHit.assert_has_calls([call('player1'), call('player2')])
 
+    def test_two_round_battle(self):
+        #given
+        game = Game([('player1', 0), ('player2', 50)])
+        game.isHit = MagicMock(side_effect = [False, False, False, True])
+        battle = Battle(game)
+        #when
+        winner = battle.run()
+        #then
+        self.assertEqual('player2', winner)
+        round1 = battle.rounds[0]
+        self.assertEqual(('player1', 'player2', False), round1.log[0])
+        self.assertEqual(('player2', 'player1', False), round1.log[1])
+        round2 = battle.rounds[1]
+        self.assertEqual(('player1', 'player2', False), round2.log[0])
+        self.assertEqual(('player2', 'player1', True), round2.log[1])
+        game.isHit.assert_has_calls([call('player1'), call('player2'), call('player1'), call('player2')])
+    
+    def test_should_not_endless_running_round(self):
+        #given
+        game = Game([('player1', 0), ('player2', 50)])
+        game.isHit = MagicMock(return_value = False)
+        battle = Battle(game)
+        #when
+        with self.assertRaises(Exception) as context:
+            winner = battle.run()
+        #then
+        self.assertTrue('dead loop' in str(context.exception))
 
 if __name__ == '__main__':
     unittest.main()
