@@ -1,9 +1,12 @@
+import random
+from random import randint
 
 class Game:
     def __init__(self, players):
         self.players = players
     def isHit(self, shooter):
-        return True
+        player = list(filter(lambda p: p[0]==shooter, self.players))[0]
+        return randint(1,100) <= player[1]
 
 class BattleRound:
     def __init__(self, players, game):

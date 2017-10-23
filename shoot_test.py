@@ -79,7 +79,7 @@ class TestShootRunner(unittest.TestCase):
     
     def test_should_not_endless_running_round(self):
         #given
-        game = Game([('player1', 0), ('player2', 50)])
+        game = Game([('player1', 0), ('player2', 0)])
         game.isHit = MagicMock(return_value = False)
         battle = Battle(game)
         #when
@@ -87,6 +87,15 @@ class TestShootRunner(unittest.TestCase):
             winner = battle.run()
         #then
         self.assertTrue('dead loop' in str(context.exception))
+
+    def test_game_isHit(self):
+        game = Game([('player1', 30), ('player2', 0)])
+        hitCount = 0
+        for i in range(100000):
+            if game.isHit('player1'): hitCount+=1
+        self.assertTrue(hitCount < 30500, 'hit too high {}'.format(hitCount))
+        self.assertTrue(hitCount > 29500, 'miss too high {}'.format(hitCount))
+
 
 if __name__ == '__main__':
     unittest.main()
