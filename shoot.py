@@ -1,6 +1,8 @@
 import random
 from random import randint
 
+#TODO Player object
+
 class Game:
     def __init__(self, players):
         self.players = players
@@ -14,8 +16,12 @@ class BattleRound:
         self.alivers = list(players)
         self.game = game
     def run(self):
-        self.shoot(self.alivers[0][0], self.alivers[1][0])
-        self.shoot(self.alivers[1][0], self.alivers[0][0])
+        for player in self.alivers:
+            if len(self.alivers) == 1: return
+            self.shoot(player[0], self.chooseTarget(player)[0])
+    def chooseTarget(self, player):           
+        if player == self.alivers[-1]: return self.alivers[-2]
+        return self.alivers[-1]
     def shoot(self, shooter, target):
         isHit = self.game.isHit(shooter)
         self.log.append((shooter, target, isHit))
@@ -78,7 +84,7 @@ class ShootRunner:
 def main():
     game = Game([('刘备', 30), ('曹操', 50), ('吕布', 100)])
     runner = ShootRunner(game)
-    print(runner.run(10))
+    print(runner.run(100))
 
 if __name__ == '__main__':
     main()

@@ -76,6 +76,21 @@ class TestShootRunner(unittest.TestCase):
         self.assertEqual(('player1', 'player2', False), round2.log[0])
         self.assertEqual(('player2', 'player1', True), round2.log[1])
         game.isHit.assert_has_calls([call('player1'), call('player2'), call('player1'), call('player2')])
+
+    def test_battle_finished_middle_of_round(self):
+        #given
+        game = Game([('player1', 0), ('player2', 50)])
+        game.isHit = MagicMock(side_effect = [True])
+        battle = Battle(game)
+        #when
+        winner = battle.run()
+        #then
+        self.assertEqual('player1', winner)
+        self.assertEqual(1, len(battle.rounds))
+        round1 = battle.rounds[0]
+        self.assertEqual(1, len(round1.log))
+        self.assertEqual(('player1', 'player2', True), round1.log[0])
+        game.isHit.aassert_called_once_with('player1')
     
     def test_should_not_endless_running_round(self):
         #given
@@ -91,10 +106,12 @@ class TestShootRunner(unittest.TestCase):
     def test_game_isHit(self):
         game = Game([('player1', 30), ('player2', 0)])
         hitCount = 0
-        for i in range(100000):
+        testCount = 100000
+        ideaHit = testCount * 30/100
+        for i in range(testCount):
             if game.isHit('player1'): hitCount+=1
-        self.assertTrue(hitCount < 30500, 'hit too high {}'.format(hitCount))
-        self.assertTrue(hitCount > 29500, 'miss too high {}'.format(hitCount))
+        self.assertTrue(hitCount < ideaHit + testCount * 0.003, 'hit too high {}'.format(hitCount))
+        self.assertTrue(hitCount > ideaHit - testCount * 0.003, 'miss too high {}'.format(hitCount))
 
 
 if __name__ == '__main__':
