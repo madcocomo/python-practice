@@ -43,7 +43,7 @@ class TestShootRunner(unittest.TestCase):
         #when
         actual = runner.run_battle()
         #then
-        mockBattle.run.assert_called_once()
+        mockBattle.run.assert_called_once_with()
         self.assertEqual('player2', actual)
 
     def test_one_round_battle(self):
@@ -90,7 +90,7 @@ class TestShootRunner(unittest.TestCase):
         round1 = battle.rounds[0]
         self.assertEqual(1, len(round1.log))
         self.assertEqual(('player1', 'player2', True), round1.log[0])
-        game.isHit.aassert_called_once_with('player1')
+        game.isHit.assert_called_once_with('player1')
     
     def test_should_not_endless_running_round(self):
         #given
