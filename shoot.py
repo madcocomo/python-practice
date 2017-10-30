@@ -2,15 +2,18 @@ import random
 from random import randint
 
 class Player:
-    def __init__(self, playerTuple):
-        self.name = playerTuple[0]
-        self.rate = playerTuple[1]
+    def __init__(self, name, rate):
+        self.name = name
+        self.rate = rate
+    def chooseTarget(self, alivers):           
+        if self == alivers[-1]: return alivers[-2]
+        return alivers[-1]
 
 class Game:
     def __init__(self, players):
-        self.players = list(map(lambda p: Player(p), players))
+        self.players = list(map(lambda p: Player(*p), players))
     def isHit(self, shooter):
-        player = list(filter(lambda p: p.name==shooter, self.players))[0]
+        player = shooter
         return randint(1,100) <= player.rate
 
 class BattleRound:
@@ -21,20 +24,15 @@ class BattleRound:
     def run(self):
         for player in self.alivers:
             if len(self.alivers) == 1: return
-            self.shoot(player.name, self.chooseTarget(player).name)
-    def chooseTarget(self, player):           
-        if player == self.alivers[-1]: return self.alivers[-2]
-        return self.alivers[-1]
-    def shoot(self, shooter, target):
+            self.shoot(player)
+    def shoot(self, shooter):
+        target = shooter.chooseTarget(self.alivers)
         isHit = self.game.isHit(shooter)
-        self.log.append((shooter, target, isHit))
+        self.log.append((shooter.name, target.name, isHit))
         if isHit:
             self.die(target)
-    def die(self, playerName):
-        for player in self.alivers:
-            if (player.name == playerName):
-                dead = player
-        self.alivers.remove(dead)
+    def die(self, player):
+        self.alivers.remove(player)
         
 class Battle:
     def __init__(self, game):

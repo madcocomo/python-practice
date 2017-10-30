@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import MagicMock
 from unittest.mock import call
-from shoot import Game, GameRecord, ShootRunner, Battle
+from shoot import Game, GameRecord, ShootRunner, Battle, Player
 
 class TestShootRunner(unittest.TestCase):
     def test_run_game(self):
@@ -49,7 +49,7 @@ class TestShootRunner(unittest.TestCase):
     def test_one_round_battle(self):
         #given
         game = Game([('player1', 0), ('player2', 100)])
-        game.isHit = MagicMock(side_effect = lambda shooter: shooter == 'player2')
+        game.isHit = MagicMock(side_effect = lambda shooter: shooter.name == 'player2')
         battle = Battle(game)
         #when
         winner = battle.run()
@@ -58,10 +58,12 @@ class TestShootRunner(unittest.TestCase):
         round1 = battle.rounds[0]
         self.assertEqual(('player1', 'player2', False), round1.log[0])
         self.assertEqual(('player2', 'player1', True), round1.log[1])
-        game.isHit.assert_has_calls([call('player1'), call('player2')])
+        #game.isHit.assert_has_calls([call(Player('player1',0)), call(Player('player2',100))])
 
     def test_two_round_battle(self):
         #given
+        player1 = Player('player1', 0)
+        player2 = Player('player2', 50)
         game = Game([('player1', 0), ('player2', 50)])
         game.isHit = MagicMock(side_effect = [False, False, False, True])
         battle = Battle(game)
@@ -75,7 +77,7 @@ class TestShootRunner(unittest.TestCase):
         round2 = battle.rounds[1]
         self.assertEqual(('player1', 'player2', False), round2.log[0])
         self.assertEqual(('player2', 'player1', True), round2.log[1])
-        game.isHit.assert_has_calls([call('player1'), call('player2'), call('player1'), call('player2')])
+        game.isHit.assert_has_calls([call(player1), call(player2), call(player1), call(player2)])
 
     def test_battle_finished_middle_of_round(self):
         #given
@@ -90,7 +92,7 @@ class TestShootRunner(unittest.TestCase):
         round1 = battle.rounds[0]
         self.assertEqual(1, len(round1.log))
         self.assertEqual(('player1', 'player2', True), round1.log[0])
-        game.isHit.assert_called_once_with('player1')
+        #game.isHit.assert_called_once_with(Player('player1',0))
     
     def test_should_not_endless_running_round(self):
         #given
