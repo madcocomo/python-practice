@@ -8,6 +8,10 @@ class Player:
     def chooseTarget(self, alivers):           
         if self == alivers[-1]: return alivers[-2]
         return alivers[-1]
+    def __str__(self):
+        return str(self.__dict__)
+    def __eq__(self, other): 
+        return self.__dict__ == other.__dict__
 
 class Game:
     def __init__(self, players):

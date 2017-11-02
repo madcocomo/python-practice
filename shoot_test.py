@@ -106,12 +106,13 @@ class TestShootRunner(unittest.TestCase):
         self.assertTrue('dead loop' in str(context.exception))
 
     def test_game_isHit(self):
+        player1 = Player('player1', 30)
         game = Game([('player1', 30), ('player2', 0)])
         hitCount = 0
         testCount = 100000
         ideaHit = testCount * 30/100
         for i in range(testCount):
-            if game.isHit('player1'): hitCount+=1
+            if game.isHit(player1): hitCount+=1
         self.assertTrue(hitCount < ideaHit + testCount * 0.003, 'hit too high {}'.format(hitCount))
         self.assertTrue(hitCount > ideaHit - testCount * 0.003, 'miss too high {}'.format(hitCount))
 
