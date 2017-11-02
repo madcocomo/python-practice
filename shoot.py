@@ -74,14 +74,10 @@ class GameRecord:
 class ShootRunner:
     def __init__(self, game):
         self.game = game
-    def __createRecord__(self):
-        return GameRecord(self.game)
-    def __createBattle__(self):
-        return Battle(self.game)
     def run_battle(self):
-        return self.__createBattle__().run()
+        return Battle(self.game).run()
     def run(self, times):
-        record = self.__createRecord__()
+        record = GameRecord(self.game)
         for i in range(times):
             record.record(self.run_battle())
         return record.__str__()

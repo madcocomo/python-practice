@@ -1,18 +1,18 @@
 import unittest
-from unittest.mock import MagicMock
-from unittest.mock import call
+from unittest.mock import MagicMock, call, patch
 from shoot import Game, GameRecord, ShootRunner, Battle, Player
 
 class TestShootRunner(unittest.TestCase):
-    def test_run_game(self):
+    @patch('shoot.Battle.run')
+    @patch('shoot.GameRecord')
+    def test_run_game(self, recordCreater, mockRun):
         RECORD_STR = '共对决10次。刘备胜5次，胜率5%。曹操胜2次，胜率2%。吕布胜3次，胜率3%。'
         #given
         game = Game([('player1', 10), ('player2', 20)])
         runner = ShootRunner(game)
-        mockRecord = MagicMock()
-        runner.__createRecord__ = MagicMock(return_value = mockRecord)
-        runner.run_battle = MagicMock(side_effect = ['player1', 'player2', 'player2'])
+        mockRecord = recordCreater.return_value
         mockRecord.__str__.return_value = RECORD_STR
+        mockRun.side_effect = ['player1', 'player2', 'player2']
         #when
         actual = runner.run(3)
         #then
@@ -33,17 +33,16 @@ class TestShootRunner(unittest.TestCase):
 对决8次。刘备胜2次，胜率25.0%；曹操胜1次，胜率12.5%；吕布胜5次，胜率62.5%。'''
         self.assertEqual(expect, actual)
 
-    def test_run_battle(self):
+    @patch('shoot.Battle.run')
+    def test_run_battle(self, mockRun):
         #given
         game = Game([('player1', 0), ('player2', 100)])
         runner = ShootRunner(game)
-        mockBattle = MagicMock()
-        runner.__createBattle__ = MagicMock(return_value = mockBattle)
-        mockBattle.run.return_value = 'player2'
+        mockRun.return_value='player2'
         #when
         actual = runner.run_battle()
         #then
-        mockBattle.run.assert_called_once_with()
+        mockRun.assert_called_once_with()
         self.assertEqual('player2', actual)
 
     def test_one_round_battle(self):
