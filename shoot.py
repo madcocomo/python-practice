@@ -44,15 +44,18 @@ class Battle:
         self.rounds = []
     def run(self):
         alivers = self.game.players
-        #while len(alivers) > 1:
         for time in range(100):
             if len(alivers) == 1:
                 return alivers[0].name
-            newRound = BattleRound(alivers, self.game)
-            self.rounds.append(newRound)
-            newRound.run()
-            alivers = newRound.alivers
+            round = self.newRound(alivers)
+            round.run()
+            alivers = round.alivers
         raise Exception('dead loop')
+    def newRound(self, alivers):
+        round = BattleRound(alivers, self.game)
+        self.rounds.append(round)
+        return round
+
 
 class GameRecord:
     def __init__(self, game):
