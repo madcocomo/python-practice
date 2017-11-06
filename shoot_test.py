@@ -94,7 +94,7 @@ class TestShootRunner(unittest.TestCase):
         self.assertEqual(1, len(round1.log))
         self.assertEqual(('player1', 'player2', True), round1.log[0])
         game.isHit.assert_called_once_with(Player('player1',0))
-    
+
     @patch('shoot.Game.isHit', MagicMock(return_value = False))
     def test_should_not_endless_running_round(self):
         #given
@@ -117,6 +117,17 @@ class TestShootRunner(unittest.TestCase):
         self.assertTrue(hitCount < ideaHit + testCount * 0.003, 'hit too high {}'.format(hitCount))
         self.assertTrue(hitCount > ideaHit - testCount * 0.003, 'miss too high {}'.format(hitCount))
 
+    def test_select_highest_rate_target(self):
+        #given
+        shooter = Player('shooter', 100)
+        player1 = Player('player1', 80)
+        player2 = Player('player2', 50)
+
+        #when
+        target = shooter.chooseTarget([player1, player2, shooter])
+        #then
+        self.assertEqual(player1.name, target.name)
+        
 
 if __name__ == '__main__':
     unittest.main()

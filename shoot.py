@@ -6,10 +6,11 @@ class Player:
         self.name = name
         self.rate = rate
     def chooseTarget(self, alivers):           
+        alivers = sorted(alivers, key=lambda p:p.rate)
         if self == alivers[-1]: return alivers[-2]
         return alivers[-1]
     def __str__(self):
-        return str(self.__dict__)
+        return '{}命中率{:.0%}'.format(self.name, self.rate/100)
     def __eq__(self, other): 
         return self.__dict__ == other.__dict__
 
