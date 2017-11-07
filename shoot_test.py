@@ -29,7 +29,8 @@ class TestShootRunner(unittest.TestCase):
         for i in range(5): record.record('吕布')
         actual = record.__str__()
         #then
-        expect = '''刘备命中率1%，曹操命中率2%，吕布命中率3%
+        expect = '''--------------------
+刘备命中率1%，曹操命中率2%，吕布命中率3%
 对决8次。刘备胜2次，胜率25.0%；曹操胜1次，胜率12.5%；吕布胜5次，胜率62.5%。'''
         self.assertEqual(expect, actual)
 
@@ -45,10 +46,10 @@ class TestShootRunner(unittest.TestCase):
         mockRun.assert_called_once_with()
         self.assertEqual('player2', actual)
 
-    @patch('shoot.Game.isHit')
+    @patch('shoot.Player.isHit')
     def test_one_round_battle(self,mockHit):
         #given
-        mockHit.side_effect = lambda shooter: shooter.name == 'player2'
+        mockHit.side_effect = [False, True]
         game = Game([('player1', 0), ('player2', 100)])
         battle = Battle(game)
         #when
@@ -58,9 +59,9 @@ class TestShootRunner(unittest.TestCase):
         round1 = battle.rounds[0]
         self.assertEqual(('player1', 'player2', False), round1.log[0])
         self.assertEqual(('player2', 'player1', True), round1.log[1])
-        mockHit.assert_has_calls([call(Player('player1',0)), call(Player('player2',100))])
+        mockHit.assert_has_calls([call(), call()])
 
-    @patch('shoot.Game.isHit')
+    @patch('shoot.Player.isHit')
     def test_two_round_battle(self, mockHit):
         #given
         player1 = Player('player1', 0)
@@ -78,12 +79,12 @@ class TestShootRunner(unittest.TestCase):
         round2 = battle.rounds[1]
         self.assertEqual(('player1', 'player2', False), round2.log[0])
         self.assertEqual(('player2', 'player1', True), round2.log[1])
-        mockHit.assert_has_calls([call(player1), call(player2), call(player1), call(player2)])
+        mockHit.assert_has_calls([call(), call(), call(), call()])
 
-    @patch('shoot.Game.isHit', MagicMock(return_value = True))
+    @patch('shoot.Player.isHit', MagicMock(return_value = True))
     def test_battle_finished_middle_of_round(self):
         #given
-        game = Game([('player1', 0), ('player2', 50)])
+        game = Game([('player1', 100), ('player2', 50)])
         battle = Battle(game)
         #when
         winner = battle.run()
@@ -93,9 +94,9 @@ class TestShootRunner(unittest.TestCase):
         round1 = battle.rounds[0]
         self.assertEqual(1, len(round1.log))
         self.assertEqual(('player1', 'player2', True), round1.log[0])
-        game.isHit.assert_called_once_with(Player('player1',0))
+        Player.isHit.assert_called_once_with()
 
-    @patch('shoot.Game.isHit', MagicMock(return_value = False))
+    @patch('shoot.Player.isHit', MagicMock(return_value = False))
     def test_should_not_endless_running_round(self):
         #given
         game = Game([('player1', 0), ('player2', 0)])
@@ -108,12 +109,11 @@ class TestShootRunner(unittest.TestCase):
 
     def test_game_isHit(self):
         player1 = Player('player1', 30)
-        game = Game([('player1', 30), ('player2', 0)])
         hitCount = 0
         testCount = 100000
         ideaHit = testCount * 30/100
         for i in range(testCount):
-            if game.isHit(player1): hitCount+=1
+            if player1.isHit(): hitCount+=1
         self.assertTrue(hitCount < ideaHit + testCount * 0.003, 'hit too high {}'.format(hitCount))
         self.assertTrue(hitCount > ideaHit - testCount * 0.003, 'miss too high {}'.format(hitCount))
 

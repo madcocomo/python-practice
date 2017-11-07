@@ -9,6 +9,8 @@ class Player:
         alivers = sorted(alivers, key=lambda p:p.rate)
         if self == alivers[-1]: return alivers[-2]
         return alivers[-1]
+    def isHit(self):
+        return randint(1,100) <= self.rate
     def __str__(self):
         return '{}命中率{:.0%}'.format(self.name, self.rate/100)
     def __eq__(self, other): 
@@ -17,10 +19,6 @@ class Player:
 class Game:
     def __init__(self, players):
         self.players = list(map(lambda p: Player(*p), players))
-    def isHit(self, shooter):
-        player = shooter
-        return randint(1,100) <= player.rate
-
 class BattleRound:
     def __init__(self, players, game):
         self.log = []
@@ -32,7 +30,7 @@ class BattleRound:
             self.shoot(player)
     def shoot(self, shooter):
         target = shooter.chooseTarget(self.alivers)
-        isHit = self.game.isHit(shooter)
+        isHit = shooter.isHit()
         self.log.append((shooter.name, target.name, isHit))
         if isHit:
             self.die(target)
@@ -67,13 +65,13 @@ class GameRecord:
         self.times += 1
         self.wins[player] += 1
     def playersInfo(self):
-        playerStr = map(lambda p: '{}命中率{:.0%}'.format(p.name, p.rate/100), self.game.players)
+        playerStr = map(Player.__str__, self.game.players)
         return '，'.join(playerStr)
     def gameInfo(self):
         gameStr = map(lambda p: '{}胜{}次，胜率{:.1%}'.format(p.name, self.wins[p.name], self.wins[p.name]/self.times), self.game.players)
         return '对决{}次。'.format(self.times) + '；'.join(gameStr) + "。"
     def __str__(self):
-        return self.playersInfo() + '\n' + self.gameInfo()
+        return '--------------------\n' + self.playersInfo() + '\n' + self.gameInfo()
 
 class ShootRunner:
     def __init__(self, game):
@@ -87,9 +85,10 @@ class ShootRunner:
         return record.__str__()
 
 def main():
-    game = Game([('刘备', 30), ('曹操', 50), ('吕布', 100)])
-    runner = ShootRunner(game)
-    print(runner.run(10000))
+    print( ShootRunner(Game([('刘备', 30), ('曹操', 50), ('吕布', 100)])).run(10000) )
+    print( ShootRunner(Game([('曹操', 50), ('刘备', 30), ('吕布', 100)])).run(10000) )
+    print( ShootRunner(Game([('吕布', 100), ('刘备', 30), ('曹操', 50)])).run(10000) )
+    print( ShootRunner(Game([('刘备', 30), ('吕布', 100), ('曹操', 50)])).run(10000) )
 
 if __name__ == '__main__':
     main()
