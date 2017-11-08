@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import MagicMock, call, patch
-from shoot import GameRecord, ShootRunner, Battle, Player
+from shoot import GameRecord, ShootRunner, Battle, BattleRound, Player
 
 class TestShootRunner(unittest.TestCase):
     @patch('shoot.Battle.run')
@@ -32,6 +32,25 @@ class TestShootRunner(unittest.TestCase):
 刘备命中率1%，曹操命中率2%，吕布命中率3%
 对决8次。刘备胜2次，胜率25.0%；曹操胜1次，胜率12.5%；吕布胜5次，胜率62.5%。'''
         self.assertEqual(expect, actual)
+
+    def test_record_details(self):
+        #given
+        players = [Player('刘备', 1), Player('曹操', 2), Player('吕布', 3)]
+        record = GameRecord(players)
+        #when
+        rounds = [BattleRound(record.players),BattleRound(record.players)]
+        record.record('刘备',rounds)
+        actual = record.details(0)
+        #then
+        expect = '''==========
+第一轮：
+刘备射击吕布，未命中。
+曹操射击吕布，命中。吕布死。
+第二轮：
+刘备射击曹操，未命中。
+曹操射击刘备，命中。刘备死。
+对决结束：曹操胜。'''
+        self.assertEquals(expect, actual)
 
     @patch('shoot.Battle.run')
     def test_run_battle(self, mockRun):
