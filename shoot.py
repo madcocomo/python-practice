@@ -16,14 +16,10 @@ class Player:
     def __eq__(self, other): 
         return self.__dict__ == other.__dict__
 
-class Game:
-    def __init__(self, players):
-        self.players = list(map(lambda p: Player(*p), players))
 class BattleRound:
-    def __init__(self, players, game):
+    def __init__(self, players):
         self.log = []
         self.alivers = list(players)
-        self.game = game
     def run(self):
         for player in self.alivers:
             if len(self.alivers) == 1: return
@@ -38,11 +34,11 @@ class BattleRound:
         self.alivers.remove(player)
         
 class Battle:
-    def __init__(self, game):
-        self.game = game
+    def __init__(self, players):
+        self.players = players
         self.rounds = []
     def run(self):
-        alivers = self.game.players
+        alivers = self.players
         for time in range(100):
             if len(alivers) == 1:
                 return alivers[0].name
@@ -51,44 +47,44 @@ class Battle:
             alivers = round.alivers
         raise Exception('dead loop')
     def newRound(self, alivers):
-        round = BattleRound(alivers, self.game)
+        round = BattleRound(alivers)
         self.rounds.append(round)
         return round
 
 
 class GameRecord:
-    def __init__(self, game):
-        self.game = game
+    def __init__(self, players):
+        self.players = players
         self.times = 0
-        self.wins = dict.fromkeys(map(lambda p: p.name, game.players), 0)
+        self.wins = dict.fromkeys(map(lambda p: p.name, players), 0)
     def record(self, player):
         self.times += 1
         self.wins[player] += 1
     def playersInfo(self):
-        playerStr = map(Player.__str__, self.game.players)
+        playerStr = map(Player.__str__, self.players)
         return '，'.join(playerStr)
     def gameInfo(self):
-        gameStr = map(lambda p: '{}胜{}次，胜率{:.1%}'.format(p.name, self.wins[p.name], self.wins[p.name]/self.times), self.game.players)
+        gameStr = map(lambda p: '{}胜{}次，胜率{:.1%}'.format(p.name, self.wins[p.name], self.wins[p.name]/self.times), self.players)
         return '对决{}次。'.format(self.times) + '；'.join(gameStr) + "。"
     def __str__(self):
         return '--------------------\n' + self.playersInfo() + '\n' + self.gameInfo()
 
 class ShootRunner:
-    def __init__(self, game):
-        self.game = game
+    def __init__(self, playerTuples):
+        self.players = list(map(lambda p: Player(*p), playerTuples))
     def run_battle(self):
-        return Battle(self.game).run()
+        return Battle(self.players).run()
     def run(self, times):
-        record = GameRecord(self.game)
+        record = GameRecord(self.players)
         for i in range(times):
             record.record(self.run_battle())
         return record.__str__()
 
 def main():
-    print( ShootRunner(Game([('刘备', 30), ('曹操', 50), ('吕布', 100)])).run(10000) )
-    print( ShootRunner(Game([('曹操', 50), ('刘备', 30), ('吕布', 100)])).run(10000) )
-    print( ShootRunner(Game([('吕布', 100), ('刘备', 30), ('曹操', 50)])).run(10000) )
-    print( ShootRunner(Game([('刘备', 30), ('吕布', 100), ('曹操', 50)])).run(10000) )
+    print( ShootRunner([('刘备', 30), ('曹操', 50), ('吕布', 100)]).run(10000) )
+    print( ShootRunner([('曹操', 50), ('刘备', 30), ('吕布', 100)]).run(10000) )
+    print( ShootRunner([('吕布', 100), ('刘备', 30), ('曹操', 50)]).run(10000) )
+    print( ShootRunner([('刘备', 30), ('吕布', 100), ('曹操', 50)]).run(10000) )
 
 if __name__ == '__main__':
     main()

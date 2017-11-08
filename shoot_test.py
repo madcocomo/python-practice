@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import MagicMock, call, patch
-from shoot import Game, GameRecord, ShootRunner, Battle, Player
+from shoot import GameRecord, ShootRunner, Battle, Player
 
 class TestShootRunner(unittest.TestCase):
     @patch('shoot.Battle.run')
@@ -8,8 +8,7 @@ class TestShootRunner(unittest.TestCase):
     def test_run_game(self, recordCreater, mockRun):
         RECORD_STR = '共对决10次。刘备胜5次，胜率5%。曹操胜2次，胜率2%。吕布胜3次，胜率3%。'
         #given
-        game = Game([('player1', 10), ('player2', 20)])
-        runner = ShootRunner(game)
+        runner = ShootRunner([('player1', 10), ('player2', 20)])
         mockRecord = recordCreater.return_value
         mockRecord.__str__.return_value = RECORD_STR
         mockRun.side_effect = ['player1', 'player2', 'player2']
@@ -21,8 +20,8 @@ class TestShootRunner(unittest.TestCase):
 
     def test_record_str(self):
         #given
-        game = Game([('刘备', 1), ('曹操', 2), ('吕布', 3)])
-        record = GameRecord(game)
+        players = [Player('刘备', 1), Player('曹操', 2), Player('吕布', 3)]
+        record = GameRecord(players)
         #when
         for i in range(2): record.record('刘备')
         for i in range(1): record.record('曹操')
@@ -37,8 +36,7 @@ class TestShootRunner(unittest.TestCase):
     @patch('shoot.Battle.run')
     def test_run_battle(self, mockRun):
         #given
-        game = Game([('player1', 0), ('player2', 100)])
-        runner = ShootRunner(game)
+        runner = ShootRunner([('player1', 0), ('player2', 100)])
         mockRun.return_value='player2'
         #when
         actual = runner.run_battle()
@@ -50,8 +48,8 @@ class TestShootRunner(unittest.TestCase):
     def test_one_round_battle(self,mockHit):
         #given
         mockHit.side_effect = [False, True]
-        game = Game([('player1', 0), ('player2', 100)])
-        battle = Battle(game)
+        players = [Player('player1', 0), Player('player2', 100)]
+        battle = Battle(players)
         #when
         winner = battle.run()
         #then
@@ -64,10 +62,8 @@ class TestShootRunner(unittest.TestCase):
     @patch('shoot.Player.isHit')
     def test_two_round_battle(self, mockHit):
         #given
-        player1 = Player('player1', 0)
-        player2 = Player('player2', 50)
-        game = Game([('player1', 0), ('player2', 50)])
-        battle = Battle(game)
+        players = [Player('player1', 0), Player('player2', 50)]
+        battle = Battle(players)
         mockHit.side_effect = [False, False, False, True]
         #when
         winner = battle.run()
@@ -84,8 +80,8 @@ class TestShootRunner(unittest.TestCase):
     @patch('shoot.Player.isHit', MagicMock(return_value = True))
     def test_battle_finished_middle_of_round(self):
         #given
-        game = Game([('player1', 100), ('player2', 50)])
-        battle = Battle(game)
+        players = [Player('player1', 100), Player('player2', 50)]
+        battle = Battle(players)
         #when
         winner = battle.run()
         #then
@@ -99,8 +95,8 @@ class TestShootRunner(unittest.TestCase):
     @patch('shoot.Player.isHit', MagicMock(return_value = False))
     def test_should_not_endless_running_round(self):
         #given
-        game = Game([('player1', 0), ('player2', 0)])
-        battle = Battle(game)
+        players = [Player('player1', 0), Player('player2', 0)]
+        battle = Battle(players)
         #when
         with self.assertRaises(Exception) as context:
             winner = battle.run()
