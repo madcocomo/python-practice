@@ -37,11 +37,13 @@ class Battle:
     def __init__(self, players):
         self.players = players
         self.rounds = []
+        self.winner = None
     def run(self):
         alivers = self.players
         for time in range(100):
             if len(alivers) == 1:
-                return alivers[0].name
+                self.winner = alivers[0].name
+                return self
             round = self.newRound(alivers)
             round.run()
             alivers = round.alivers
@@ -51,15 +53,16 @@ class Battle:
         self.rounds.append(round)
         return round
 
-
 class GameRecord:
     def __init__(self, players):
         self.players = players
         self.times = 0
         self.wins = dict.fromkeys(map(lambda p: p.name, players), 0)
-    def record(self, player):
+        self.details = []
+    def record(self, battle):
         self.times += 1
-        self.wins[player] += 1
+        self.wins[battle.winner] += 1
+        self.details.append(battle)
     def playersInfo(self):
         playerStr = map(Player.__str__, self.players)
         return '，'.join(playerStr)

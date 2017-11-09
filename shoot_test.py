@@ -23,9 +23,9 @@ class TestShootRunner(unittest.TestCase):
         players = [Player('刘备', 1), Player('曹操', 2), Player('吕布', 3)]
         record = GameRecord(players)
         #when
-        for i in range(2): record.record('刘备')
-        for i in range(1): record.record('曹操')
-        for i in range(5): record.record('吕布')
+        for i in range(2): record.record(MagicMock(winner='刘备'))
+        for i in range(1): record.record(MagicMock(winner='曹操'))
+        for i in range(5): record.record(MagicMock(winner='吕布'))
         actual = record.__str__()
         #then
         expect = '''--------------------
@@ -35,14 +35,19 @@ class TestShootRunner(unittest.TestCase):
 
     def test_record_details(self):
         #given
-        players = [Player('刘备', 1), Player('曹操', 2), Player('吕布', 3)]
+        mockBattle = MagicMock()
+        mockBattle.winner = 'whatever'
+        mockBattle.__str__.return_value = 'Battle detail Strings'
+        players = [Player('whatever', 1)]
         record = GameRecord(players)
         #when
-        rounds = [BattleRound(record.players),BattleRound(record.players)]
-        record.record('刘备',rounds)
-        actual = record.details(0)
+        record.record(mockBattle)
+        actual = record.details[0].__str__()
         #then
-        expect = '''==========
+        expect = 'Battle detail Strings'
+        self.assertEqual(expect, actual)
+
+        '''==========
 第一轮：
 刘备射击吕布，未命中。
 曹操射击吕布，命中。吕布死。
@@ -50,18 +55,17 @@ class TestShootRunner(unittest.TestCase):
 刘备射击曹操，未命中。
 曹操射击刘备，命中。刘备死。
 对决结束：曹操胜。'''
-        self.assertEquals(expect, actual)
 
     @patch('shoot.Battle.run')
     def test_run_battle(self, mockRun):
         #given
         runner = ShootRunner([('player1', 0), ('player2', 100)])
-        mockRun.return_value='player2'
+        mockRun.return_value.winner = 'player2'
         #when
         actual = runner.run_battle()
         #then
         mockRun.assert_called_once_with()
-        self.assertEqual('player2', actual)
+        self.assertEqual('player2', actual.winner)
 
     @patch('shoot.Player.isHit')
     def test_one_round_battle(self,mockHit):
@@ -70,13 +74,14 @@ class TestShootRunner(unittest.TestCase):
         players = [Player('player1', 0), Player('player2', 100)]
         battle = Battle(players)
         #when
-        winner = battle.run()
+        battle.run()
         #then
-        self.assertEqual('player2', winner)
+        self.assertEqual('player2', battle.winner)
         round1 = battle.rounds[0]
         self.assertEqual(('player1', 'player2', False), round1.log[0])
         self.assertEqual(('player2', 'player1', True), round1.log[1])
         mockHit.assert_has_calls([call(), call()])
+        
 
     @patch('shoot.Player.isHit')
     def test_two_round_battle(self, mockHit):
@@ -85,9 +90,9 @@ class TestShootRunner(unittest.TestCase):
         battle = Battle(players)
         mockHit.side_effect = [False, False, False, True]
         #when
-        winner = battle.run()
+        battle.run()
         #then
-        self.assertEqual('player2', winner)
+        self.assertEqual('player2', battle.winner)
         round1 = battle.rounds[0]
         self.assertEqual(('player1', 'player2', False), round1.log[0])
         self.assertEqual(('player2', 'player1', False), round1.log[1])
@@ -102,9 +107,9 @@ class TestShootRunner(unittest.TestCase):
         players = [Player('player1', 100), Player('player2', 50)]
         battle = Battle(players)
         #when
-        winner = battle.run()
+        battle.run()
         #then
-        self.assertEqual('player1', winner)
+        self.assertEqual('player1', battle.winner)
         self.assertEqual(1, len(battle.rounds))
         round1 = battle.rounds[0]
         self.assertEqual(1, len(round1.log))
