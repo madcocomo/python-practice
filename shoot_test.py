@@ -15,7 +15,7 @@ class TestShootRunner(unittest.TestCase):
         #when
         actual = runner.run(3)
         #then
-        self.assertEqual(RECORD_STR, actual)
+        self.assertEqual(RECORD_STR, actual.__str__())
         mockRecord.record.assert_has_calls([call('player1'), call('player2'), call('player2')])
 
     def test_record_str(self):
@@ -46,15 +46,6 @@ class TestShootRunner(unittest.TestCase):
         #then
         expect = 'Battle detail Strings'
         self.assertEqual(expect, actual)
-
-        '''==========
-第一轮：
-刘备射击吕布，未命中。
-曹操射击吕布，命中。吕布死。
-第二轮：
-刘备射击曹操，未命中。
-曹操射击刘备，命中。刘备死。
-对决结束：曹操胜。'''
 
     @patch('shoot.Battle.run')
     def test_run_battle(self, mockRun):
@@ -126,6 +117,27 @@ class TestShootRunner(unittest.TestCase):
             winner = battle.run()
         #then
         self.assertTrue('dead loop' in str(context.exception))
+
+    @patch('shoot.Player.isHit')
+    def test_battle_detail_str(self,mockHit):
+        #given
+        players = [Player('刘备', 10), Player('曹操', 50), Player('吕布', 100)]
+        battle = Battle(players)
+        mockHit.side_effect = [False, True, False, True]
+        #when
+        battle.run()
+        #then
+        self.assertEqual('曹操', battle.winner)
+        self.assertEqual(2, len(battle.rounds))
+        expect = '''==========
+第1轮：
+刘备射击吕布，未命中。
+曹操射击吕布，命中。吕布死。
+第2轮：
+刘备射击曹操，未命中。
+曹操射击刘备，命中。刘备死。
+对决结束：曹操胜。'''
+        self.assertEqual(expect, battle.__str__())
 
     def test_game_isHit(self):
         player1 = Player('player1', 30)

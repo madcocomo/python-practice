@@ -52,6 +52,18 @@ class Battle:
         round = BattleRound(alivers)
         self.rounds.append(round)
         return round
+    def __str__(self):
+        str = '=========='
+        for i in range(len(self.rounds)):
+            str += '\n第{}轮：'.format(i+1)
+            for shoot in self.rounds[i].log:
+                str += '\n' + self.formatShootInfo(*shoot)
+        str += '\n对决结束：{}胜。'.format(self.winner)
+        return str
+    def formatShootInfo(self, shooter, target, isHit):
+        templet = '{0}射击{1}，命中。{1}死。' if isHit else '{}射击{}，未命中。'
+        return templet.format(shooter,target)
+
 
 class GameRecord:
     def __init__(self, players):
@@ -81,13 +93,19 @@ class ShootRunner:
         record = GameRecord(self.players)
         for i in range(times):
             record.record(self.run_battle())
-        return record.__str__()
+        return record
 
 def main():
-    print( ShootRunner([('刘备', 30), ('曹操', 50), ('吕布', 100)]).run(10000) )
-    print( ShootRunner([('曹操', 50), ('刘备', 30), ('吕布', 100)]).run(10000) )
-    print( ShootRunner([('吕布', 100), ('刘备', 30), ('曹操', 50)]).run(10000) )
-    print( ShootRunner([('刘备', 30), ('吕布', 100), ('曹操', 50)]).run(10000) )
+    printGame( ShootRunner([('刘备', 30), ('曹操', 50), ('吕布', 100)]) )
+    printGame( ShootRunner([('曹操', 50), ('刘备', 30), ('吕布', 100)]) )
+    printGame( ShootRunner([('吕布', 100), ('刘备', 30), ('曹操', 50)]) )
+    printGame( ShootRunner([('刘备', 30), ('吕布', 100), ('曹操', 50)]) )
+
+def printGame(runner):
+    record = runner.run(10000)
+    print( record.__str__() )
+    print( record.details[365].__str__() + '\n......\n' )
+
 
 if __name__ == '__main__':
     main()
