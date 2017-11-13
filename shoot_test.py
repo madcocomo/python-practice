@@ -20,7 +20,7 @@ class TestShootRunner(unittest.TestCase):
 
     def test_record_str(self):
         #given
-        players = [Player('刘备', 1), Player('曹操', 2), Player('吕布', 3)]
+        players = [Player('刘备', 1, WaitForOneOpponentStrategy()), Player('曹操', 2), Player('吕布', 3)]
         record = GameRecord(players)
         #when
         for i in range(2): record.record(MagicMock(winner='刘备'))
@@ -29,8 +29,11 @@ class TestShootRunner(unittest.TestCase):
         actual = record.__str__()
         #then
         expect = '''--------------------
-刘备命中率1%，曹操命中率2%，吕布命中率3%
-对决8次。刘备胜2次，胜率25.0%；曹操胜1次，胜率12.5%；吕布胜5次，胜率62.5%。'''
+刘备命中率1%，等待剩下一名对手再射击。曹操命中率2%，射击命中率最高对手。吕布命中率3%，射击命中率最高对手。
+对决8次。
+刘备胜2次，胜率25.0%；
+曹操胜1次，胜率12.5%；
+吕布胜5次，胜率62.5%。'''
         self.assertEqual(expect, actual)
 
     def test_record_details(self):

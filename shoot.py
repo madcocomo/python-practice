@@ -5,9 +5,13 @@ class SelectHighestRateStrategy:
     def chooseTarget(self, opponents):           
         opponents = sorted(opponents, key=lambda p:p.rate)
         return opponents[-1]
+    def __str__(self):
+        return '射击命中率最高对手'
 class WaitForOneOpponentStrategy:
     def chooseTarget(self, opponents):           
         return None if len(opponents) != 1 else opponents[0] 
+    def __str__(self):
+        return '等待剩下一名对手再射击'
 
 class Player:
     def __init__(self, name, rate, strategy=SelectHighestRateStrategy()):
@@ -21,7 +25,7 @@ class Player:
     def isHit(self):
         return randint(1,100) <= self.rate
     def __str__(self):
-        return '{}命中率{:.0%}'.format(self.name, self.rate/100)
+        return '{}命中率{:.0%}，{}'.format(self.name, self.rate/100, self.strategy)
     def __eq__(self, other): 
         return self.__dict__ == other.__dict__
 
@@ -86,10 +90,10 @@ class GameRecord:
         self.details.append(battle)
     def playersInfo(self):
         playerStr = map(Player.__str__, self.players)
-        return '，'.join(playerStr)
+        return '。'.join(playerStr) + '。'
     def gameInfo(self):
         gameStr = map(lambda p: '{}胜{}次，胜率{:.1%}'.format(p.name, self.wins[p.name], self.wins[p.name]/self.times), self.players)
-        return '对决{}次。'.format(self.times) + '；'.join(gameStr) + "。"
+        return '对决{}次。\n'.format(self.times) + '；\n'.join(gameStr) + "。"
     def __str__(self):
         return '--------------------\n' + self.playersInfo() + '\n' + self.gameInfo()
 
