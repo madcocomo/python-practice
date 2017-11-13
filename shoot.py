@@ -39,10 +39,12 @@ class BattleRound:
             self.shoot(player)
     def shoot(self, shooter):
         target = shooter.chooseTarget(self.alivers)
-        isHit = shooter.isHit()
-        self.log.append((shooter.name, target.name, isHit))
-        if isHit:
-            self.die(target)
+        if target is None:
+            self.log.append((shooter.name, None, False))
+        else:
+            isHit = shooter.isHit()
+            self.log.append((shooter.name, target.name, isHit))
+            if isHit: self.die(target)
     def die(self, player):
         self.alivers.remove(player)
         
@@ -74,7 +76,7 @@ class Battle:
         str += '\n对决结束：{}胜。'.format(self.winner)
         return str
     def formatShootInfo(self, shooter, target, isHit):
-        templet = '{0}射击{1}，命中。{1}死。' if isHit else '{}射击{}，未命中。'
+        templet = '{0}朝天射击。' if target is None else '{0}射击{1}，命中。{1}死。' if isHit else '{}射击{}，未命中。'
         return templet.format(shooter,target)
 
 
@@ -110,9 +112,8 @@ class ShootRunner:
 
 def main():
     printGame( ShootRunner([('刘备', 30), ('曹操', 50), ('吕布', 100)]) )
+    printGame( ShootRunner([('刘备', 30, WaitForOneOpponentStrategy()), ('曹操', 50), ('吕布', 100)]) )
     printGame( ShootRunner([('曹操', 50), ('刘备', 30), ('吕布', 100)]) )
-    printGame( ShootRunner([('吕布', 100), ('刘备', 30), ('曹操', 50)]) )
-    printGame( ShootRunner([('刘备', 30), ('吕布', 100), ('曹操', 50)]) )
 
 def printGame(runner):
     record = runner.run(10000)

@@ -110,6 +110,22 @@ class TestShootRunner(unittest.TestCase):
         self.assertEqual(('player1', 'player2', True), round1.log[0])
         Player.isHit.assert_called_once_with()
 
+    @patch('shoot.Player.isHit', MagicMock(return_value = True))
+    def test_shold_always_missing_when_select_none_target(self):
+        #given
+        mockNoShoot = MagicMock()
+        mockNoShoot.chooseTarget.return_value = None
+        players = [Player('player1', 100, mockNoShoot), Player('player2', 50)]
+        battle = Battle(players)
+        #when
+        battle.run()
+        #then
+        self.assertEqual('player2', battle.winner)
+        self.assertEqual(1, len(battle.rounds))
+        round1 = battle.rounds[0]
+        self.assertEqual(2, len(round1.log))
+        self.assertEqual(('player1', None, False), round1.log[0])
+
     @patch('shoot.Player.isHit', MagicMock(return_value = False))
     def test_should_not_endless_running_round(self):
         #given
@@ -124,9 +140,9 @@ class TestShootRunner(unittest.TestCase):
     @patch('shoot.Player.isHit')
     def test_battle_detail_str(self,mockHit):
         #given
-        players = [Player('刘备', 10), Player('曹操', 50), Player('吕布', 100)]
+        players = [Player('刘备', 10, WaitForOneOpponentStrategy()), Player('曹操', 50), Player('吕布', 100)]
         battle = Battle(players)
-        mockHit.side_effect = [False, True, False, True]
+        mockHit.side_effect = [True, False, True]
         #when
         battle.run()
         #then
@@ -134,7 +150,7 @@ class TestShootRunner(unittest.TestCase):
         self.assertEqual(2, len(battle.rounds))
         expect = '''==========
 第1轮：
-刘备射击吕布，未命中。
+刘备朝天射击。
 曹操射击吕布，命中。吕布死。
 第2轮：
 刘备射击曹操，未命中。
