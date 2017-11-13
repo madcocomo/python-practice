@@ -1,14 +1,23 @@
 import random
 from random import randint
 
+class SelectHighestRateStrategy:
+    def chooseTarget(self, opponents):           
+        opponents = sorted(opponents, key=lambda p:p.rate)
+        return opponents[-1]
+class WaitForOneOpponentStrategy:
+    def chooseTarget(self, opponents):           
+        return None if len(opponents) != 1 else opponents[0] 
+
 class Player:
-    def __init__(self, name, rate):
+    def __init__(self, name, rate, strategy=SelectHighestRateStrategy()):
         self.name = name
         self.rate = rate
+        self.strategy = strategy
     def chooseTarget(self, alivers):           
-        alivers = sorted(alivers, key=lambda p:p.rate)
-        if self == alivers[-1]: return alivers[-2]
-        return alivers[-1]
+        opponents = list(alivers)
+        opponents.remove(self)
+        return self.strategy.chooseTarget(opponents)
     def isHit(self):
         return randint(1,100) <= self.rate
     def __str__(self):

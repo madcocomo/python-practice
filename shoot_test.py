@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import MagicMock, call, patch
-from shoot import GameRecord, ShootRunner, Battle, BattleRound, Player
+from shoot import *
 
 class TestShootRunner(unittest.TestCase):
     @patch('shoot.Battle.run')
@@ -149,17 +149,39 @@ class TestShootRunner(unittest.TestCase):
         self.assertTrue(hitCount < ideaHit + testCount * 0.003, 'hit too high {}'.format(hitCount))
         self.assertTrue(hitCount > ideaHit - testCount * 0.003, 'miss too high {}'.format(hitCount))
 
-    def test_select_highest_rate_target(self):
+    def test_select_target_by_strategy(self):
         #given
-        shooter = Player('shooter', 100)
         player1 = Player('player1', 80)
         player2 = Player('player2', 50)
+        strategy = MagicMock()
+        strategy.chooseTarget.return_value = player2
+        shooter = Player('shooter', 100, strategy)
 
         #when
         target = shooter.chooseTarget([player1, player2, shooter])
         #then
-        self.assertEqual(player1.name, target.name)
+        self.assertEqual(player2.name, target.name)
+        strategy.chooseTarget.assert_called_once_with([player1, player2])
         
+    def test_select_highest_rate_strategy(self):
+        #given
+        player1 = Player('player1', 80)
+        player2 = Player('player2', 50)
+        strategy = SelectHighestRateStrategy()
+        #when
+        target = strategy.chooseTarget([player1, player2])
+        #then
+        self.assertEqual(player1.name, target.name)
+
+    def test_wait_for_one_opponent_strategy(self):
+        #given
+        player1 = Player('player1', 80)
+        player2 = Player('player2', 50)
+        strategy = WaitForOneOpponentStrategy()
+        #then
+        self.assertEqual(None, strategy.chooseTarget([player1, player2]))
+        self.assertEqual('player1', strategy.chooseTarget([player1]).name)
+
 
 if __name__ == '__main__':
     unittest.main()
