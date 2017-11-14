@@ -1,4 +1,4 @@
-import random
+from argparse import ArgumentParser
 from random import randint
 
 class SelectHighestRateStrategy:
@@ -110,16 +110,21 @@ class ShootRunner:
             record.record(self.run_battle())
         return record
 
+showDetials = False
 def main():
-    printGame( ShootRunner([('刘备', 30), ('曹操', 50), ('吕布', 100)]) )
-    printGame( ShootRunner([('刘备', 30, WaitForOneOpponentStrategy()), ('曹操', 50), ('吕布', 100)]) )
-    printGame( ShootRunner([('曹操', 50), ('刘备', 30), ('吕布', 100)]) )
+    printGame( ShootRunner([('刘备', 10), ('曹操', 20), ('吕布', 100)]) )
+    printGame( ShootRunner([('刘备', 10, WaitForOneOpponentStrategy()), ('曹操', 20), ('吕布', 100)]) )
 
 def printGame(runner):
     record = runner.run(10000)
     print( record.__str__() )
-    print( record.details[365].__str__() + '\n......\n' )
+    if showDetials:
+        print( record.details[365].__str__() + '\n......\n' )
 
 
 if __name__ == '__main__':
+    parser = ArgumentParser()
+    parser.add_argument('-v', help='print game details', action='store_true')
+    args = parser.parse_args()
+    showDetials = args.v
     main()
