@@ -1,4 +1,5 @@
 import time
+import random
 
 class Point:
     def __init__(self, x, y):
@@ -53,13 +54,14 @@ class World:
         return result
 
 if __name__ == '__main__':
+    size = 10
     world = World()
-    world.putLifeAt(Point(5,4))
-    world.putLifeAt(Point(5,5))
-    world.putLifeAt(Point(5,6))
-    world.putLifeAt(Point(6,5))
-    print(world.output(Point(0,0), Point(10,10)))
-    while True:
+    for initLife in range(size*2):
+        x = random.randint(0,size)
+        y = random.randint(0,size)
+        world.putLifeAt(Point(x,y))
+    print(world.output(Point(0,0), Point(size,size)))
+    for i in range(30):
         time.sleep(1)
         world = world.nextGen()
         print(world.output(Point(0,0), Point(10,10)))
