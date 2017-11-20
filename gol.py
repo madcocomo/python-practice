@@ -1,4 +1,5 @@
 import time
+import sys
 import random
 
 class Point:
@@ -53,6 +54,10 @@ class World:
                 result += 'O' if self.isAlive(Point(x,y)) else '.'
         return result
 
+def output(world):
+    print(chr(27) + '[2J')
+    print(world.output(Point(0,0), Point(size,size)))
+
 if __name__ == '__main__':
     size = 10
     world = World()
@@ -60,8 +65,8 @@ if __name__ == '__main__':
         x = random.randint(0,size)
         y = random.randint(0,size)
         world.putLifeAt(Point(x,y))
-    print(world.output(Point(0,0), Point(size,size)))
+    output(world)
     for i in range(30):
         time.sleep(1)
         world = world.nextGen()
-        print(world.output(Point(0,0), Point(10,10)))
+        output(world)
