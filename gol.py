@@ -1,4 +1,5 @@
 from curses import wrapper
+from argparse import ArgumentParser
 import time
 import random
 
@@ -61,17 +62,29 @@ def output(stdscr, world):
 def run(stdscr):
     stdscr.clear()
     world = World()
-    for initLife in range(size*2):
+    for initLife in range(size * int(args.density)):
         x = random.randint(0,size)
         y = random.randint(0,size)
         world.putLifeAt(Point(x,y))
     output(stdscr, world)
-    for i in range(30):
-        time.sleep(1)
+    i = 0
+    while i != args.times:
+        i += 1
+        time.sleep(args.interval)
         world = world.nextGen()
         output(stdscr, world)
 
+def definArgs():
+    parser.add_argument('-s', dest='size', help='output window size', type=int, default=10)
+    parser.add_argument('-i', dest='interval', help='refresh interval', type=float, default=1)
+    parser.add_argument('-t', dest='times', help='generation time, -1 run forever', type=int, default=30)
+    parser.add_argument('-d', dest='density', help='initial life numbers, size relative', type=int, default=2)
+ 
+
 if __name__ == '__main__':
-    size = 10
+    parser = ArgumentParser()
+    definArgs()
+    args = parser.parse_args()
+    size = args.size
     wrapper(run)
 
