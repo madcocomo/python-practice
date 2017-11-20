@@ -1,5 +1,5 @@
+from curses import wrapper
 import time
-import sys
 import random
 
 class Point:
@@ -54,19 +54,24 @@ class World:
                 result += 'O' if self.isAlive(Point(x,y)) else '.'
         return result
 
-def output(world):
-    print(chr(27) + '[2J')
-    print(world.output(Point(0,0), Point(size,size)))
+def output(stdscr, world):
+    stdscr.addstr(0, 0, world.output(Point(0,0), Point(size,size)))
+    stdscr.refresh()
 
-if __name__ == '__main__':
-    size = 10
+def run(stdscr):
+    stdscr.clear()
     world = World()
     for initLife in range(size*2):
         x = random.randint(0,size)
         y = random.randint(0,size)
         world.putLifeAt(Point(x,y))
-    output(world)
+    output(stdscr, world)
     for i in range(30):
         time.sleep(1)
         world = world.nextGen()
-        output(world)
+        output(stdscr, world)
+
+if __name__ == '__main__':
+    size = 10
+    wrapper(run)
+
