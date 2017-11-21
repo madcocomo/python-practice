@@ -16,11 +16,11 @@ class Point:
     def adjoint(self, other):
         return other in self.getNeighbors()
     def getNeighbors(self):
-        result = set()
+        result = []
         for xd in [-1, 0, 1]:
             for yd in [-1, 0, 1]:
                 if not(xd==0 and yd==0):
-                    result.add(Point(self.x+xd, self.y+yd))
+                    result.append(Point(self.x+xd, self.y+yd))
         return result
 
 class World:
@@ -38,7 +38,7 @@ class World:
     def mayChangeCells(self):
         cells = set(self.__alives)
         for point in self.__alives:
-            cells = cells | point.getNeighbors()
+            cells = cells | set(point.getNeighbors())
         return cells
     def willBeAlive(self, point):
         aroundNum = self.around(point)
@@ -55,36 +55,53 @@ class World:
                 result += 'O' if self.isAlive(Point(x,y)) else '.'
         return result
 
-def output(stdscr, world):
-    stdscr.addstr(0, 0, world.output(Point(0,0), Point(size,size)))
-    stdscr.refresh()
+class Screen:
+    def __init__(self, stdscr):
+        self.stdscr = stdscr
+        stdscr.clear()
+    def show(self, world):
+        self.stdscr.addstr(0, 0, world.output(Point(0,0), Point(size,size)))
+        self.stdscr.refresh()
+        return world
 
-def run(stdscr):
-    stdscr.clear()
+class Print:
+    def __init__(self, stdscr):
+        pass
+    def show(self, world):
+        print( world.output(Point(0,0), Point(size,size)))
+        return world
+
+def initWorld():
     world = World()
     for initLife in range(size * int(args.density)):
         x = random.randint(0,size)
         y = random.randint(0,size)
         world.putLifeAt(Point(x,y))
-    output(stdscr, world)
+    return world
+
+def run(stdscr):
+    output = args.output(stdscr)
+    world = output.show(initWorld())
     i = 0
     while i != args.times:
         i += 1
         time.sleep(args.interval)
-        world = world.nextGen()
-        output(stdscr, world)
+        world = output.show(world.nextGen())
 
 def definArgs():
+    parser = ArgumentParser()
     parser.add_argument('-s', dest='size', help='output window size', type=int, default=10)
     parser.add_argument('-i', dest='interval', help='refresh interval', type=float, default=1)
     parser.add_argument('-t', dest='times', help='generation time, -1 run forever', type=int, default=30)
     parser.add_argument('-d', dest='density', help='initial life numbers, size relative', type=int, default=2)
+    parser.add_argument('--print', dest='output', help='output mode', const=Print, action='store_const', default=Screen)
+    return parser.parse_args()
  
 
 if __name__ == '__main__':
-    parser = ArgumentParser()
-    definArgs()
-    args = parser.parse_args()
+    args = definArgs()
     size = args.size
-    wrapper(run)
-
+    if args.output == Screen:
+        wrapper(run)
+    else:
+        run(None)
