@@ -1,4 +1,5 @@
 from curses import wrapper
+import curses
 from argparse import ArgumentParser
 import time
 import random
@@ -64,11 +65,17 @@ class Screen:
     def __run(self, stdscr):
         self.stdscr = stdscr
         stdscr.clear()
+        self.__initViewSize()
         self.fun(self)
+    def __initViewSize(self):
+        self.leftTop = Point(0,0)
+        bottom = min(curses.LINES-2, size)
+        right = min(curses.COLS-2, size)
+        self.bottomRight = Point(bottom, right)
     def trigger(self):
         self.stdscr.getkey()
     def show(self, world):
-        self.stdscr.addstr(0, 0, world.output(Point(0,0), Point(size,size)))
+        self.stdscr.addstr(0, 0, world.output(self.leftTop, self.bottomRight))
         self.stdscr.refresh()
         return world
 
@@ -94,7 +101,6 @@ def run(output):
     i = 0
     while i != args.times:
         i += 1
-        #time.sleep(args.interval)
         output.trigger()
         world = output.show(world.nextGen())
 
