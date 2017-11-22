@@ -54,21 +54,29 @@ class World:
         for x in range(topLeft.x, bottomRight.x+1):
             result += '\n'
             for y in range(topLeft.y, bottomRight.y+1):
-                result += 'O' if self.isAlive(Point(x,y)) else '.'
+                result += 'O' if self.isAlive(Point(x,y)) else '_'
         return result
 
 class Screen:
-    def __init__(self, stdscr):
+    def runInContext(self, fun):
+        self.fun = fun
+        wrapper(self.__run)
+    def __run(self, stdscr):
         self.stdscr = stdscr
         stdscr.clear()
+        self.fun(self)
+    def trigger(self):
+        self.stdscr.getkey()
     def show(self, world):
         self.stdscr.addstr(0, 0, world.output(Point(0,0), Point(size,size)))
         self.stdscr.refresh()
         return world
 
 class Print:
-    def __init__(self, stdscr):
-        pass
+    def runInContext(self, fun):
+        fun(self)
+    def trigger(self):
+        a = input('press enter to next generation...')
     def show(self, world):
         print( world.output(Point(0,0), Point(size,size)))
         return world
@@ -81,19 +89,19 @@ def initWorld():
         world.putLifeAt(Point(x,y))
     return world
 
-def run(stdscr):
-    output = args.output(stdscr)
+def run(output):
     world = output.show(initWorld())
     i = 0
     while i != args.times:
         i += 1
-        time.sleep(args.interval)
+        #time.sleep(args.interval)
+        output.trigger()
         world = output.show(world.nextGen())
 
 def definArgs():
     parser = ArgumentParser()
     parser.add_argument('-s', dest='size', help='output window size', type=int, default=10)
-    parser.add_argument('-i', dest='interval', help='refresh interval', type=float, default=1)
+    parser.add_argument('-i', dest='interval', help='refresh interval, 0 to run in step mode', type=float, default=1)
     parser.add_argument('-t', dest='times', help='generation time, -1 run forever', type=int, default=30)
     parser.add_argument('-d', dest='density', help='initial life numbers, size relative', type=int, default=2)
     parser.add_argument('--print', dest='output', help='output mode', const=Print, action='store_const', default=Screen)
@@ -103,7 +111,8 @@ def definArgs():
 if __name__ == '__main__':
     args = definArgs()
     size = args.size
-    if args.output == Screen:
-        wrapper(run)
-    else:
-        run(None)
+    output = args.output()
+    if args.interval > 0:
+        output.trigger = lambda : time.sleep(args.interval)
+    output.runInContext(run)
+

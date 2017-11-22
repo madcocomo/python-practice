@@ -82,10 +82,10 @@ class GoLTest(unittest.TestCase):
         world.putLifeAt(Point(2,2))
         world.putLifeAt(Point(1,3))
         expect = '''
-....
-.O.O
-..O.
-....'''
+____
+_O_O
+__O_
+____'''
         self.assertEqual(expect, world.output(Point(0,0),Point(3,3)))
 
 if __name__ == '__main__':
