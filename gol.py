@@ -14,7 +14,9 @@ class Point:
     def __hash__(self):
         return hash(self.__str__())
     def adjoint(self, other):
-        return other in self.getNeighbors()
+        return -1 <= other.x - self.x <= 1 \
+            and -1 <= other.y -self.y <= 1 \
+            and not(other.x == self.x and other.y == self.y)
     def getNeighbors(self):
         result = []
         for xd in [-1, 0, 1]:
