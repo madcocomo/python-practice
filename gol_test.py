@@ -73,10 +73,10 @@ class GoLTest(unittest.TestCase):
         world.putLifeAt(Point(1,1))
         world.putLifeAt(Point(2,2))
         world.putLifeAt(Point(1,3))
-        expect = '''
+        expect = '''\
 ____
-_O_O
-__O_
+_o_o
+__o_
 ____'''
         self.assertEqual(expect, world.output(Point(0,0),Point(3,3)))
 

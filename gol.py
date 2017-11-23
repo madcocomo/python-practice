@@ -57,9 +57,9 @@ class World:
     def output(self, topLeft, bottomRight):
         result = ''
         for x in range(topLeft.x, bottomRight.x+1):
-            result += '\n'
             for y in range(topLeft.y, bottomRight.y+1):
-                result += 'O' if self.isAlive(Point(x,y)) else '_'
+                result += 'o' if self.isAlive(Point(x,y)) else '_'
+            if x < bottomRight.x: result += '\n'
         return result
 
 class Screen:
@@ -68,6 +68,7 @@ class Screen:
         curses.wrapper(self.__run)
     def __run(self, stdscr):
         self.stdscr = stdscr
+        curses.curs_set(False)
         curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
         stdscr.clear()
         self.__initViewSize()
@@ -80,7 +81,7 @@ class Screen:
     def trigger(self):
         self.stdscr.getkey()
     def show(self, world):
-        self.stdscr.addstr(0, 0, world.output(self.leftTop, self.bottomRight), curses.color_pair(1))
+        self.stdscr.addstr(0, 0, world.output(self.leftTop, self.bottomRight), curses.color_pair(1) |curses.A_DIM)
         self.stdscr.refresh()
         return world
 
