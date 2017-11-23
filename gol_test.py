@@ -28,29 +28,21 @@ class GoLTest(unittest.TestCase):
         newWorld = world.nextGen()
         self.assertTrue(newWorld.isAlive(Point(1,1)) )
     
-    def test_get_3_around(self):
-        world = World()
-        world.putLifeAt(Point(1,1))
-        world.putLifeAt(Point(0,0))
-        world.putLifeAt(Point(1,0))
-        world.putLifeAt(Point(2,2))
-        self.assertEqual(3, world.around(Point(1,1)) )
-
-    @patch('gol.World.around', MagicMock(return_value = 3))
+    @patch('gol.World.countNeighbors', MagicMock(return_value = {Point(1,1):3}.items()))
     def test_should_alive_with_3_around(self):
         world = World()
         world.putLifeAt(Point(1,1))
         newWorld = world.nextGen()
         self.assertTrue(newWorld.isAlive(Point(1,1)) )
 
-    @patch('gol.World.around', MagicMock(return_value = 4))
+    @patch('gol.World.countNeighbors', MagicMock(return_value = {Point(1,1):4}.items()))
     def test_should_die_with_4_around(self):
         world = World()
         world.putLifeAt(Point(1,1))
         newWorld = world.nextGen()
         self.assertFalse(newWorld.isAlive(Point(1,1)) )
 
-    @patch('gol.World.around', MagicMock(return_value = 2))
+    @patch('gol.World.countNeighbors', MagicMock(return_value = {Point(1,1):2}.items()))
     def test_should_not_reproduce_with_2_around(self):
         world = World()
         newWorld = world.nextGen()

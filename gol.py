@@ -1,6 +1,7 @@
 from curses import wrapper
 import curses
 from argparse import ArgumentParser
+from collections import Counter
 import time
 import random
 
@@ -41,9 +42,10 @@ class World:
                 newWorld.putLifeAt(point)
         return newWorld
     def countNeighbors(self):
-        counts = dict()
-        for cell in self.mayChangeCells():
-            counts[cell] = self.around(cell)
+        counts = Counter()
+        for cell in self.__alives:
+            for neighbor in cell.getNeighbors():
+                counts[neighbor] += 1
         return counts.items()
     def mayChangeCells(self):
         cells = set(self.__alives)
@@ -53,9 +55,6 @@ class World:
     def willBeAlive(self, point, neighborsCount):
         if neighborsCount == 2: return self.isAlive(point)
         return neighborsCount == 3
-    def around(self, point):
-        arounds = list(filter(point.adjoint, self.__alives))
-        return len(arounds)
     def output(self, topLeft, bottomRight):
         result = ''
         for x in range(topLeft.x, bottomRight.x+1):
