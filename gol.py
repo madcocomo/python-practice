@@ -12,6 +12,7 @@ class Point:
         return self.__dict__ == other.__dict__
     def __str__(self):
         return '({},{})'.format(self.x, self.y)
+    __repr__ = __str__
     def __hash__(self):
         return hash(self.__str__())
     def adjoint(self, other):
@@ -35,18 +36,23 @@ class World:
         self.__alives.add(point)
     def nextGen(self):
         newWorld = World()
-        for point in filter (self.willBeAlive, self.mayChangeCells()):
-            newWorld.putLifeAt(point)
+        for point, count in self.countNeighbors():
+            if self.willBeAlive(point, count):
+                newWorld.putLifeAt(point)
         return newWorld
+    def countNeighbors(self):
+        counts = dict()
+        for cell in self.mayChangeCells():
+            counts[cell] = self.around(cell)
+        return counts.items()
     def mayChangeCells(self):
         cells = set(self.__alives)
         for point in self.__alives:
             cells = cells | set(point.getNeighbors())
         return cells
-    def willBeAlive(self, point):
-        aroundNum = self.around(point)
-        if aroundNum == 2: return self.isAlive(point)
-        return aroundNum == 3
+    def willBeAlive(self, point, neighborsCount):
+        if neighborsCount == 2: return self.isAlive(point)
+        return neighborsCount == 3
     def around(self, point):
         arounds = list(filter(point.adjoint, self.__alives))
         return len(arounds)

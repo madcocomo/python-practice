@@ -64,9 +64,9 @@ class GoLTest(unittest.TestCase):
         world.putLifeAt(Point(1,2))
         world.putLifeAt(Point(1,3))
         newWorld = world.nextGen()
-        mockChecker.assert_has_calls( [call(Point(0,0)), call(Point(0,1)), call(Point(0,3)), \
-                call(Point(1,1)), call(Point(1,2)), call(Point(1,3))], \
-                any_order=True )
+        mockChecker.assert_has_calls( [call(Point(0,0), 1), call(Point(0,1), 2), call(Point(0,2), 3), \
+                call(Point(1,1), 1), call(Point(1,2), 2), call(Point(1,3), 1) \
+                ], any_order=True )
 
     def test_should_reproduce_with_3_around(self):
         world = World()
