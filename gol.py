@@ -71,16 +71,17 @@ class Screen:
         curses.curs_set(False)
         curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
         stdscr.clear()
-        self.__initViewSize()
         self.fun(self)
-    def __initViewSize(self):
+    def updateViewSize(self):
+        curses.update_lines_cols()
         self.leftTop = Point(0,0)
-        bottom = min(curses.LINES-2, size)
-        right = min(curses.COLS-2, size)
+        bottom = curses.LINES-2
+        right = curses.COLS-2
         self.bottomRight = Point(bottom, right)
     def trigger(self):
         self.stdscr.getkey()
     def show(self, world):
+        self.updateViewSize()
         self.stdscr.addstr(0, 0, world.output(self.leftTop, self.bottomRight), curses.color_pair(1) |curses.A_DIM)
         self.stdscr.refresh()
         return world
