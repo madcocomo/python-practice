@@ -3,6 +3,7 @@ from argparse import ArgumentParser
 from collections import Counter
 import time
 import random
+import sys
 
 class Point:
     def __init__(self, x, y):
@@ -65,15 +66,20 @@ class World:
         return result
 
 class Screen:
+    def __init__(self, waitFun):
+        self.waitFun = waitFun
     def runInContext(self, fun):
         self.fun = fun
         curses.wrapper(self.__run)
     def __run(self, stdscr):
-        self.stdscr = stdscr
+        self.__initScr(stdscr)
+        self.fun(self)
+    def __initScr(self, stdscr):
+        stdscr.nodelay(not(self.waitFun.stepMode))
         curses.curs_set(False)
         curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
         stdscr.clear()
-        self.fun(self)
+        self.stdscr = stdscr
     def updateViewSize(self):
         curses.update_lines_cols()
         self.leftTop = Point(0,0)
@@ -81,7 +87,9 @@ class Screen:
         right = curses.COLS-2
         self.bottomRight = Point(bottom, right)
     def trigger(self):
-        self.stdscr.getkey()
+        c = self.stdscr.getch()
+        if c == ord('q'): sys.exit()
+        self.waitFun()
     def show(self, world):
         self.updateViewSize()
         self.stdscr.addstr(0, 0, world.output(self.leftTop, self.bottomRight), curses.color_pair(1) |curses.A_DIM)
@@ -89,12 +97,18 @@ class Screen:
         return world
 
 class Print:
+    def __init__(self, waitFun):
+        self.waitFun = waitFun
     def runInContext(self, fun):
         fun(self)
     def trigger(self):
-        a = input('press enter to next generation...')
+        if self.waitFun.stepMode:
+            a = input('press enter to next generation...')
+            if a == 'q': sys.exit()
+        else:
+            self.waitFun()
     def show(self, world):
-        print( world.output(Point(0,0), Point(size,size)))
+        print('='*(size+1),'\n'+world.output(Point(0,0), Point(size,size)))
         return world
 
 def initWorld():
@@ -118,7 +132,7 @@ def run(output):
 def definArgs():
     parser = ArgumentParser()
     parser.add_argument('-s', dest='size', help='output window size', type=int, default=10)
-    parser.add_argument('-i', dest='interval', help='refresh interval, 0 to run in step mode', type=float, default=1)
+    parser.add_argument('-i', dest='interval', help='refresh interval, negative to run in step mode', type=float, default=1)
     parser.add_argument('-t', dest='times', help='generation time, -1 run forever', type=int, default=30)
     parser.add_argument('-d', dest='density', help='initial life numbers, size relative', type=int, default=2)
     parser.add_argument('-ls', dest='lifeSignal', help='char to present a life', type=str, default='o')
@@ -130,8 +144,12 @@ def definArgs():
 if __name__ == '__main__':
     args = definArgs()
     size = args.size
-    output = args.output()
-    if args.interval > 0:
-        output.trigger = lambda : time.sleep(args.interval)
+    if args.interval < 0:
+        waitFun = lambda : None
+        waitFun.stepMode = True
+    else:
+        waitFun = lambda : time.sleep(args.interval)
+        waitFun.stepMode = False
+    output = args.output(waitFun)
     output.runInContext(run)
 
