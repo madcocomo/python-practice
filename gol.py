@@ -117,6 +117,8 @@ class Screen:
             self.leftTop = self.leftTop.down(10)
         if c == ord('J'):
             self.leftTop = self.leftTop.down(50)
+        if c == ord('0'):
+            self.leftTop = Point(0,0)
         curses.flushinp()
     def show(self, world):
         self.updateViewSize()
