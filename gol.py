@@ -15,17 +15,17 @@ class Point:
         return '({},{})'.format(self.y, self.x)
     __repr__ = __str__
     def __hash__(self):
-        return hash(self.__str__())
+        return hash((self.y,self.x))
     def adjoint(self, other):
         return -1 <= other.x - self.x <= 1 \
             and -1 <= other.y -self.y <= 1 \
             and not(other.x == self.x and other.y == self.y)
     def getNeighbors(self):
-        result = []
-        for yd in [-1, 0, 1]:
-            for xd in [-1, 0, 1]:
-                if not(xd==0 and yd==0):
-                    result.append(Point(self.y+yd, self.x+xd))
+        left = self.left()
+        right = self.right()
+        up = self.up()
+        down = self.down()
+        result = [left.up(), left, left.down(), up, down, right.up(), right, right.down()]
         return result
     def left(self, i=1):
         return Point(self.y, self.x-i)
