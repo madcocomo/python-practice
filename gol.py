@@ -28,6 +28,8 @@ class Point:
         return result
 
 class World:
+    lifeSignal = 'o'
+    emptySignal = '_'
     def __init__(self):
         self.__alives = set()
     def isAlive(self, point):
@@ -58,7 +60,7 @@ class World:
         result = ''
         for x in range(topLeft.x, bottomRight.x+1):
             for y in range(topLeft.y, bottomRight.y+1):
-                result += 'o' if self.isAlive(Point(x,y)) else '_'
+                result += self.lifeSignal if self.isAlive(Point(x,y)) else self.emptySignal
             if x < bottomRight.x: result += '\n'
         return result
 
@@ -96,6 +98,8 @@ class Print:
         return world
 
 def initWorld():
+    World.lifeSignal = args.lifeSignal
+    World.emptySignal = args.emptySignal
     world = World()
     for initLife in range(size * int(args.density)):
         x = random.randint(0,size)
@@ -117,6 +121,8 @@ def definArgs():
     parser.add_argument('-i', dest='interval', help='refresh interval, 0 to run in step mode', type=float, default=1)
     parser.add_argument('-t', dest='times', help='generation time, -1 run forever', type=int, default=30)
     parser.add_argument('-d', dest='density', help='initial life numbers, size relative', type=int, default=2)
+    parser.add_argument('-ls', dest='lifeSignal', help='char to present a life', type=str, default='o')
+    parser.add_argument('-es', dest='emptySignal', help='char to present an empty cell', type=str, default=' ')
     parser.add_argument('--print', dest='output', help='output mode', const=Print, action='store_const', default=Screen)
     return parser.parse_args()
  
