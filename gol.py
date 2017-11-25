@@ -6,13 +6,13 @@ import random
 import sys
 
 class Point:
-    def __init__(self, x, y):
+    def __init__(self, y, x):
         self.x = x
         self.y = y
     def __eq__(self, other):
         return self.__dict__ == other.__dict__
     def __str__(self):
-        return '({},{})'.format(self.x, self.y)
+        return '({},{})'.format(self.y, self.x)
     __repr__ = __str__
     def __hash__(self):
         return hash(self.__str__())
@@ -22,11 +22,19 @@ class Point:
             and not(other.x == self.x and other.y == self.y)
     def getNeighbors(self):
         result = []
-        for xd in [-1, 0, 1]:
-            for yd in [-1, 0, 1]:
+        for yd in [-1, 0, 1]:
+            for xd in [-1, 0, 1]:
                 if not(xd==0 and yd==0):
-                    result.append(Point(self.x+xd, self.y+yd))
+                    result.append(Point(self.y+yd, self.x+xd))
         return result
+    def left(self, i=1):
+        return Point(self.y, self.x-i)
+    def right(self, i=1):
+        return Point(self.y, self.x+i)
+    def up(self, i=1):
+        return Point(self.y-i, self.x)
+    def down(self, i=1):
+        return Point(self.y+i, self.x)
 
 class World:
     lifeSignal = 'o'
@@ -59,10 +67,10 @@ class World:
         return neighborsCount == 3
     def output(self, topLeft, bottomRight):
         result = ''
-        for x in range(topLeft.x, bottomRight.x+1):
-            for y in range(topLeft.y, bottomRight.y+1):
-                result += self.lifeSignal if self.isAlive(Point(x,y)) else self.emptySignal
-            if x < bottomRight.x: result += '\n'
+        for y in range(topLeft.y, bottomRight.y+1):
+            for x in range(topLeft.x, bottomRight.x+1):
+                result += self.lifeSignal if self.isAlive(Point(y,x)) else self.emptySignal
+            if y < bottomRight.y: result += '\n'
         return result
 
 class Screen:
@@ -72,6 +80,7 @@ class Screen:
         self.fun = fun
         curses.wrapper(self.__run)
     def __run(self, stdscr):
+        self.leftTop = Point(0,0)
         self.__initScr(stdscr)
         self.fun(self)
     def __initScr(self, stdscr):
@@ -82,14 +91,33 @@ class Screen:
         self.stdscr = stdscr
     def updateViewSize(self):
         curses.update_lines_cols()
-        self.leftTop = Point(0,0)
-        bottom = curses.LINES-2
-        right = curses.COLS-2
+        bottom = curses.LINES-2 + self.leftTop.y
+        right = curses.COLS-2 + self.leftTop.x
         self.bottomRight = Point(bottom, right)
     def trigger(self):
-        c = self.stdscr.getch()
-        if c == ord('q'): sys.exit()
+        self.reactInput()
         self.waitFun()
+    def reactInput(self):
+        c = self.stdscr.getch()
+        if c == ord('q'):
+             sys.exit()
+        if c == curses.KEY_LEFT:
+            self.leftTop = self.leftTop.left(10)
+        if c == ord('H'):
+            self.leftTop = self.leftTop.left(50)
+        if c == curses.KEY_RIGHT:
+            self.leftTop = self.leftTop.right(10)
+        if c == ord('L'):
+            self.leftTop = self.leftTop.right(50)
+        if c == curses.KEY_UP:
+            self.leftTop = self.leftTop.up(10)
+        if c == ord('K'):
+            self.leftTop = self.leftTop.up(50)
+        if c == curses.KEY_DOWN:
+            self.leftTop = self.leftTop.down(10)
+        if c == ord('J'):
+            self.leftTop = self.leftTop.down(50)
+        curses.flushinp()
     def show(self, world):
         self.updateViewSize()
         self.stdscr.addstr(0, 0, world.output(self.leftTop, self.bottomRight), curses.color_pair(1) |curses.A_DIM)
@@ -116,9 +144,9 @@ def initWorld():
     World.emptySignal = args.emptySignal
     world = World()
     for initLife in range(size * int(args.density)):
-        x = random.randint(0,size)
         y = random.randint(0,size)
-        world.putLifeAt(Point(x,y))
+        x = random.randint(0,size)
+        world.putLifeAt(Point(y,x))
     return world
 
 def run(output):
@@ -129,7 +157,7 @@ def run(output):
         output.trigger()
         world = output.show(world.nextGen())
 
-def definArgs():
+def defineArgs():
     parser = ArgumentParser()
     parser.add_argument('-s', dest='size', help='output window size', type=int, default=10)
     parser.add_argument('-i', dest='interval', help='refresh interval, negative to run in step mode', type=float, default=1)
@@ -139,10 +167,10 @@ def definArgs():
     parser.add_argument('-es', dest='emptySignal', help='char to present an empty cell', type=str, default=' ')
     parser.add_argument('--print', dest='output', help='output mode', const=Print, action='store_const', default=Screen)
     return parser.parse_args()
- 
+
 
 if __name__ == '__main__':
-    args = definArgs()
+    args = defineArgs()
     size = args.size
     if args.interval < 0:
         waitFun = lambda : None

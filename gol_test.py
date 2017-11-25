@@ -76,9 +76,8 @@ class GoLTest(unittest.TestCase):
         expect = '''\
 ____
 _o_o
-__o_
-____'''
-        self.assertEqual(expect, world.output(Point(0,0),Point(3,3)))
+__o_'''
+        self.assertEqual(expect, world.output(Point(0,0),Point(2,3)))
 
 if __name__ == '__main__':
     unittest.main()
