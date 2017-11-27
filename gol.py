@@ -99,26 +99,16 @@ class Screen:
         self.waitFun()
     def reactInput(self):
         c = self.stdscr.getch()
-        if c == ord('q'):
-             sys.exit()
-        if c == curses.KEY_LEFT:
-            self.leftTop = self.leftTop.left(10)
-        if c == ord('H'):
-            self.leftTop = self.leftTop.left(50)
-        if c == curses.KEY_RIGHT:
-            self.leftTop = self.leftTop.right(10)
-        if c == ord('L'):
-            self.leftTop = self.leftTop.right(50)
-        if c == curses.KEY_UP:
-            self.leftTop = self.leftTop.up(10)
-        if c == ord('K'):
-            self.leftTop = self.leftTop.up(50)
-        if c == curses.KEY_DOWN:
-            self.leftTop = self.leftTop.down(10)
-        if c == ord('J'):
-            self.leftTop = self.leftTop.down(50)
-        if c == ord('0'):
-            self.leftTop = Point(0,0)
+        if c == ord('q'): sys.exit()
+        if c in [curses.KEY_LEFT, ord('h')]: self.leftTop = self.leftTop.left(10)
+        if c in [curses.KEY_RIGHT, ord('l')]: self.leftTop = self.leftTop.right(10)
+        if c in [curses.KEY_UP, ord('k')]: self.leftTop = self.leftTop.up(10)
+        if c in [curses.KEY_DOWN, ord('j')]: self.leftTop = self.leftTop.down(10)
+        if c == ord('H'): self.leftTop = self.leftTop.left(50)
+        if c == ord('L'): self.leftTop = self.leftTop.right(50)
+        if c == ord('K'): self.leftTop = self.leftTop.up(50)
+        if c == ord('J'): self.leftTop = self.leftTop.down(50)
+        if c == ord('0'): self.leftTop = Point(0,0)
         curses.flushinp()
     def show(self, world):
         self.updateViewSize()
