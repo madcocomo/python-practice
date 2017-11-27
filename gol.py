@@ -145,7 +145,7 @@ def initWorld():
     World.lifeSignal = args.lifeSignal
     World.emptySignal = args.emptySignal
     world = World()
-    for initLife in range(size * int(args.density)):
+    for initLife in range(int(size * size * args.density / 100)):
         y = random.randint(0,size)
         x = random.randint(0,size)
         world.putLifeAt(Point(y,x))
@@ -161,10 +161,10 @@ def run(output):
 
 def defineArgs():
     parser = ArgumentParser()
-    parser.add_argument('-s', dest='size', help='output window size', type=int, default=10)
+    parser.add_argument('-s', dest='size', help='output window size', type=int, default=30)
     parser.add_argument('-i', dest='interval', help='refresh interval, negative to run in step mode', type=float, default=1)
     parser.add_argument('-t', dest='times', help='generation time, -1 run forever', type=int, default=30)
-    parser.add_argument('-d', dest='density', help='initial life numbers, size relative', type=int, default=2)
+    parser.add_argument('-d', dest='density', help='initial life numbers, size relative', type=int, default=10)
     parser.add_argument('-ls', dest='lifeSignal', help='char to present a life', type=str, default='o')
     parser.add_argument('-es', dest='emptySignal', help='char to present an empty cell', type=str, default=' ')
     parser.add_argument('--print', dest='output', help='output mode', const=Print, action='store_const', default=Screen)
