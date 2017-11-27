@@ -1,32 +1,17 @@
 import curses
 from argparse import ArgumentParser
 from collections import Counter
+from collections import namedtuple
 import time
 import random
 import sys
 
-class Point:
-    def __init__(self, y, x):
-        self.x = x
-        self.y = y
-    def __eq__(self, other):
-        return self.__dict__ == other.__dict__
-    def __str__(self):
-        return '({},{})'.format(self.y, self.x)
-    __repr__ = __str__
-    def __hash__(self):
-        return hash((self.y,self.x))
+class Point(namedtuple('P', 'y x')):
+    __slots__ = ()
     def adjoint(self, other):
-        return -1 <= other.x - self.x <= 1 \
-            and -1 <= other.y -self.y <= 1 \
-            and not(other.x == self.x and other.y == self.y)
-    def getNeighbors(self):
-        left = self.left()
-        right = self.right()
-        up = self.up()
-        down = self.down()
-        result = [left.up(), left, left.down(), up, down, right.up(), right, right.down()]
-        return result
+        return not(other == self) \
+            and -1 <= other.x - self.x <= 1 \
+            and -1 <= other.y -self.y <= 1
     def left(self, i=1):
         return Point(self.y, self.x-i)
     def right(self, i=1):
@@ -35,6 +20,13 @@ class Point:
         return Point(self.y-i, self.x)
     def down(self, i=1):
         return Point(self.y+i, self.x)
+    def getNeighbors(self):
+        left = self.left()
+        right = self.right()
+        up = self.up()
+        down = self.down()
+        result = [left.up(), left, left.down(), up, down, right.up(), right, right.down()]
+        return result
 
 class World:
     lifeSignal = 'o'

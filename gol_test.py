@@ -2,7 +2,7 @@ import unittest
 from unittest.mock import MagicMock, patch, call
 from gol import *
 
-class GoLTest(unittest.TestCase):
+class GolTest(unittest.TestCase):
     def test_init_dead(self):
         world = World()
         self.assertFalse(world.isAlive(Point(1,1)) )
