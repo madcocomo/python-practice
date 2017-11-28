@@ -1,7 +1,6 @@
-import curses
 from argparse import ArgumentParser
-from collections import Counter
-from collections import namedtuple
+from collections import Counter, namedtuple
+import curses
 import time
 import random
 import sys
@@ -49,11 +48,6 @@ class World:
             for neighbor in cell.getNeighbors():
                 counts[neighbor] += 1
         return counts.items()
-    def mayChangeCells(self):
-        cells = set(self.__alives)
-        for point in self.__alives:
-            cells = cells | set(point.getNeighbors())
-        return cells
     def willBeAlive(self, point, neighborsCount):
         if neighborsCount == 2: return self.isAlive(point)
         return neighborsCount == 3
