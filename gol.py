@@ -60,7 +60,8 @@ class World:
         return result
 
 class Screen:
-    def __init__(self, waitFun):
+    def __init__(self, world, waitFun):
+        self.world = world
         self.waitFun = waitFun
     def runInContext(self, fun):
         self.fun = fun
@@ -83,6 +84,7 @@ class Screen:
     def trigger(self):
         self.reactInput()
         self.waitFun()
+        self.world = self.world.nextGen()
     def reactInput(self):
         c = self.stdscr.getch()
         if c == ord('q'): sys.exit()
@@ -96,14 +98,14 @@ class Screen:
         if c == ord('J'): self.leftTop = self.leftTop.down(50)
         if c == ord('0'): self.leftTop = Point(0,0)
         curses.flushinp()
-    def show(self, world):
+    def show(self):
         self.updateViewSize()
-        self.stdscr.addstr(0, 0, world.output(self.leftTop, self.bottomRight), curses.color_pair(1) |curses.A_DIM)
+        self.stdscr.addstr(0, 0, self.world.output(self.leftTop, self.bottomRight), curses.color_pair(1) |curses.A_DIM)
         self.stdscr.refresh()
-        return world
 
 class Print:
-    def __init__(self, waitFun):
+    def __init__(self, world, waitFun):
+        self.world = world
         self.waitFun = waitFun
     def runInContext(self, fun):
         fun(self)
@@ -113,9 +115,9 @@ class Print:
             if a == 'q': sys.exit()
         else:
             self.waitFun()
-    def show(self, world):
-        print('='*(size+1),'\n'+world.output(Point(0,0), Point(size,size)))
-        return world
+        self.world = self.world.nextGen()
+    def show(self):
+        print('='*(size+1),'\n'+self.world.output(Point(0,0), Point(size,size)))
 
 def initWorld():
     World.lifeSignal = args.lifeSignal
@@ -127,13 +129,13 @@ def initWorld():
         world.putLifeAt(Point(y,x))
     return world
 
-def run(output):
-    world = output.show(initWorld())
+def run(runner):
+    runner.show()
     i = 0
     while i != args.times:
         i += 1
-        output.trigger()
-        world = output.show(world.nextGen())
+        runner.trigger()
+        runner.show()
 
 def defineArgs():
     parser = ArgumentParser()
@@ -143,7 +145,7 @@ def defineArgs():
     parser.add_argument('-d', dest='density', help='initial life numbers, size relative', type=int, default=10)
     parser.add_argument('-ls', dest='lifeSignal', help='char to present a life', type=str, default='o')
     parser.add_argument('-es', dest='emptySignal', help='char to present an empty cell', type=str, default=' ')
-    parser.add_argument('--print', dest='output', help='output mode', const=Print, action='store_const', default=Screen)
+    parser.add_argument('--print', dest='runner', help='output mode', const=Print, action='store_const', default=Screen)
     return parser.parse_args()
 
 
@@ -156,6 +158,6 @@ if __name__ == '__main__':
     else:
         waitFun = lambda : time.sleep(args.interval)
         waitFun.stepMode = False
-    output = args.output(waitFun)
-    output.runInContext(run)
+    runner = args.runner(initWorld(), waitFun)
+    runner.runInContext(run)
 
