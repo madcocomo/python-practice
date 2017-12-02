@@ -4,6 +4,7 @@ import curses
 import time
 import random
 import sys
+import threading
 
 class Point(namedtuple('P', 'y x')):
     __slots__ = ()
@@ -59,6 +60,7 @@ class World:
             if y < bottomRight.y: result += '\n'
         return result
 
+
 class Screen:
     def __init__(self, world, waitFun):
         self.world = world
@@ -71,23 +73,25 @@ class Screen:
         self.__initScr(stdscr)
         self.fun(self)
     def __initScr(self, stdscr):
-        stdscr.nodelay(not(self.waitFun.stepMode))
+        #stdscr.nodelay(not(self.waitFun.stepMode))
         curses.curs_set(False)
         curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
         stdscr.clear()
         self.stdscr = stdscr
+        thread = InputThread(self)
+        thread.start()
     def updateViewSize(self):
         curses.update_lines_cols()
         bottom = curses.LINES-2 + self.leftTop.y
         right = curses.COLS-2 + self.leftTop.x
         self.bottomRight = Point(bottom, right)
     def trigger(self):
-        self.reactInput()
+        #self.reactInput()
         self.waitFun()
         self.world = self.world.nextGen()
     def reactInput(self):
         c = self.stdscr.getch()
-        if c == ord('q'): sys.exit()
+        #if c == ord('q'): sys.exit()
         if c in [curses.KEY_LEFT, ord('h')]: self.leftTop = self.leftTop.left(10)
         if c in [curses.KEY_RIGHT, ord('l')]: self.leftTop = self.leftTop.right(10)
         if c in [curses.KEY_UP, ord('k')]: self.leftTop = self.leftTop.up(10)
@@ -102,6 +106,16 @@ class Screen:
         self.updateViewSize()
         self.stdscr.addstr(0, 0, self.world.output(self.leftTop, self.bottomRight), curses.color_pair(1) |curses.A_DIM)
         self.stdscr.refresh()
+
+class InputThread(threading.Thread):
+    def __init__(self, screen):
+        threading.Thread.__init__(self)
+        self.screen = screen
+        self.runCount = 0
+    def run(self):
+        while True:
+            self.screen.reactInput()
+            self.screen.show()
 
 class Print:
     def __init__(self, world, waitFun):
