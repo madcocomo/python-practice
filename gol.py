@@ -71,15 +71,29 @@ class Screen:
     def __run(self, stdscr):
         self.leftTop = Point(0,0)
         self.__initScr(stdscr)
-        self.fun(self)
+        self.thread = InputThread(self)
+        self.thread.start()
+        try:
+            self.fun(self)
+        except (KeyboardInterrupt):
+            pass
+        self.closeKeyListener(self.thread)
+    def closeKeyListener(self, thread): 
+        while thread.isAlive():
+            try:
+                curses.ungetch('q')
+                if thread.isAlive(): time.sleep(0.1)
+            finally:
+                pass
+
     def __initScr(self, stdscr):
         #stdscr.nodelay(not(self.waitFun.stepMode))
+        stdscr.timeout(0)
+        stdscr.notimeout(1)
         curses.curs_set(False)
         curses.init_pair(1, curses.COLOR_GREEN, curses.COLOR_BLACK)
         stdscr.clear()
         self.stdscr = stdscr
-        thread = InputThread(self)
-        thread.start()
     def updateViewSize(self):
         curses.update_lines_cols()
         bottom = curses.LINES-2 + self.leftTop.y
@@ -90,18 +104,21 @@ class Screen:
         self.waitFun()
         self.world = self.world.nextGen()
     def reactInput(self):
+        updated = True
         c = self.stdscr.getch()
-        #if c == ord('q'): sys.exit()
-        if c in [curses.KEY_LEFT, ord('h')]: self.leftTop = self.leftTop.left(10)
-        if c in [curses.KEY_RIGHT, ord('l')]: self.leftTop = self.leftTop.right(10)
-        if c in [curses.KEY_UP, ord('k')]: self.leftTop = self.leftTop.up(10)
-        if c in [curses.KEY_DOWN, ord('j')]: self.leftTop = self.leftTop.down(10)
-        if c == ord('H'): self.leftTop = self.leftTop.left(50)
-        if c == ord('L'): self.leftTop = self.leftTop.right(50)
-        if c == ord('K'): self.leftTop = self.leftTop.up(50)
-        if c == ord('J'): self.leftTop = self.leftTop.down(50)
-        if c == ord('0'): self.leftTop = Point(0,0)
-        curses.flushinp()
+        if c == ord('q'): sys.exit()
+        elif c in [curses.KEY_LEFT, ord('h')]: self.leftTop = self.leftTop.left(10)
+        elif c in [curses.KEY_RIGHT, ord('l')]: self.leftTop = self.leftTop.right(10)
+        elif c in [curses.KEY_UP, ord('k')]: self.leftTop = self.leftTop.up(10)
+        elif c in [curses.KEY_DOWN, ord('j')]: self.leftTop = self.leftTop.down(10)
+        elif c == ord('H'): self.leftTop = self.leftTop.left(50)
+        elif c == ord('L'): self.leftTop = self.leftTop.right(50)
+        elif c == ord('K'): self.leftTop = self.leftTop.up(50)
+        elif c == ord('J'): self.leftTop = self.leftTop.down(50)
+        elif c == ord('0'): self.leftTop = Point(0,0)
+        else: updated = False
+        #if updated: curses.flushinp()
+        return updated
     def show(self):
         self.updateViewSize()
         self.stdscr.addstr(0, 0, self.world.output(self.leftTop, self.bottomRight), curses.color_pair(1) |curses.A_DIM)
@@ -111,11 +128,11 @@ class InputThread(threading.Thread):
     def __init__(self, screen):
         threading.Thread.__init__(self)
         self.screen = screen
-        self.runCount = 0
     def run(self):
-        while True:
-            self.screen.reactInput()
-            self.screen.show()
+        while self.isAlive():
+            updated = self.screen.reactInput()
+            if not(self.isAlive()): return
+            if updated: self.screen.show()
 
 class Print:
     def __init__(self, world, waitFun):
