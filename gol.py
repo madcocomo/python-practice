@@ -73,6 +73,7 @@ class Screen:
         self.__initScr(stdscr)
         self.thread = InputThread(self)
         self.thread.start()
+        time.sleep(0.1)
         try:
             self.fun(self)
         except (KeyboardInterrupt):
@@ -107,6 +108,7 @@ class Screen:
         updated = True
         c = self.stdscr.getch()
         if c == ord('q'): sys.exit()
+        elif c == ord('R'): self.__show()
         elif c in [curses.KEY_LEFT, ord('h')]: self.leftTop = self.leftTop.left(10)
         elif c in [curses.KEY_RIGHT, ord('l')]: self.leftTop = self.leftTop.right(10)
         elif c in [curses.KEY_UP, ord('k')]: self.leftTop = self.leftTop.up(10)
@@ -120,6 +122,8 @@ class Screen:
         #if updated: curses.flushinp()
         return updated
     def show(self):
+        curses.ungetch('R')
+    def __show(self):
         self.updateViewSize()
         self.stdscr.addstr(0, 0, self.world.output(self.leftTop, self.bottomRight), curses.color_pair(1) |curses.A_DIM)
         self.stdscr.refresh()
@@ -132,7 +136,6 @@ class InputThread(threading.Thread):
         while self.isAlive():
             updated = self.screen.reactInput()
             if not(self.isAlive()): return
-            if updated: self.screen.show()
 
 class Print:
     def __init__(self, world, waitFun):
